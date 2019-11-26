@@ -1,16 +1,9 @@
-# import asyncio
 from typing import Dict, Callable
-
-# from hypercorn.config import Config
-# from hypercorn.asyncio import serve
 
 from cactuar.handlers import HTTPHandler, WebSocketHandler, LifespanHandler
 from cactuar.request import Request
 from cactuar.response import Response
 from cactuar.routers import Router, MethodRouter
-
-# config = Config()
-# config.bind = ["localhost:8080"]
 
 
 class App:
@@ -39,7 +32,3 @@ class App:
 
     async def handle_request(self, request: Request) -> Response:
         return await self.router.handle_request(request)
-
-
-# if __name__ == "__main__":
-#     asyncio.run(serve(App(), config))

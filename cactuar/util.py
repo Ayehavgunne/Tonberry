@@ -1,7 +1,8 @@
 import decimal
 import json
+import inspect
 from dataclasses import is_dataclass, asdict
-from typing import Dict, Union
+from typing import Dict, Union, Any
 
 
 class DataClassEncoder(json.JSONEncoder):
