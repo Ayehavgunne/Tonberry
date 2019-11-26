@@ -1,7 +1,7 @@
 import json
 from dataclasses import is_dataclass
 import inspect
-from typing import TYPE_CHECKING, Union, Dict, Optional, Type, List
+from typing import TYPE_CHECKING, Union, Dict, Optional, Type, List, Callable
 
 import dacite
 
@@ -25,8 +25,6 @@ class Router:
 
 
 class MethodRouter(Router):
-    DEFAULT_ROUTE = "index"
-
     def __init__(self, app):
         super().__init__(app)
         self._root: Optional[Type] = None
@@ -49,7 +47,9 @@ class MethodRouter(Router):
 
     async def _dispatch(self, request: Request) -> Union[str, bytes, Dict]:
         func = self.get_func(request)
+        return await self.call_func(request, func)
 
+    async def call_func(self, request: Request, func: Callable):
         args = []
         kwargs = {}
 
@@ -98,6 +98,9 @@ class MethodRouter(Router):
             elif var_keyword:
                 arg_types["keyword"][key] = kwargs.pop(key)
 
+        if request._unsearched_path != "":
+            pass
+
         if func is not None and not kwargs:
             # noinspection PyUnresolvedReferences
             is_async_callable_class = callable(func) and inspect.iscoroutinefunction(
@@ -116,16 +119,17 @@ class MethodRouter(Router):
 
         raise HTTPError(404)
 
-    def get_func(self, request: Request):
+    def get_func(self, request: Request) -> Callable:
         http_method = request.method
         url_path = request.path
         paths = [pth for pth in url_path.split("/") if pth != ""]
+        route = self.match_route("", self._tree.children, http_method)
         level = 0
-        route = self.match_route(paths[level], self._tree.children, http_method)
         while isinstance(route, Branch):
-            level += 1
             route = self.match_route(paths[level], route.children, http_method)
+            level += 1
         if route:
+            request._unsearched_path = "".join(paths[level:])
             return route.route_mapping.func
         else:
             raise HTTPError(404)
@@ -142,7 +146,7 @@ class MethodRouter(Router):
                 elif isinstance(route, Branch):
                     return route
 
-    def build_tree(self, cls):
+    def build_tree(self, cls) -> List[Union[Branch, Leaf]]:
         children = []
 
         for key, value in cls.__class__.__dict__.items():

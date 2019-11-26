@@ -14,6 +14,7 @@ class Request:
         self._query_string = scope.get("query_string")
         self.body = scope.get("body")
         self.headers = Header(scope.get("headers"))
+        self._unsearched_path = self.path
 
     @property
     def path(self):

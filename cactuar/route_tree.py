@@ -16,5 +16,7 @@ class Branch(Node):
 
 class Leaf(Node):
     def __init__(self, route: str, route_mapping: RouteMapping):
+        if route == "index":
+            route = ""
         super().__init__(route)
         self.route_mapping = route_mapping
