@@ -1,20 +1,47 @@
-from typing import Dict
+from typing import Dict, Optional, Callable
 from urllib.parse import urlparse, parse_qs, ParseResult
 
 from cactuar.headers import Header
+from cactuar.route_tree import Node
+from cactuar.util import format_data
 
 
 class Request:
-    def __init__(self, scope: Dict):
+    def __init__(self, scope: Dict, recieve: Callable):
+        self._recieve = recieve
         self.method = scope.get("method")
         self.type = scope.get("type")
         self._uri: ParseResult = urlparse(scope.get("path"))
         self.raw_uri = scope.get("raw_path")
         self.root_path = scope.get("root_path")
         self._query_string = scope.get("query_string")
-        self.body = scope.get("body")
+        self._body: Optional[bytes] = None
         self.headers = Header(scope.get("headers"))
-        self._unsearched_path = self.path
+        self.current_route: Optional[Node] = None
+        self._unsearched_path: str = ""
+
+    async def stream(self):
+        while True:
+            chunk = await self._recieve()
+            if chunk["type"] == "http.request":
+                body = chunk.get("body", b"")
+                if body:
+                    yield body
+                if not chunk.get("more_body", False):
+                    break
+        yield b""
+
+    async def get_body(self):
+        if self._body is None:
+            chunks = []
+            async for chunk in self.stream():
+                chunks.append(chunk)
+            self._body = b"".join(chunks)
+        return self._body
+
+    @property
+    def body(self):
+        return self._body
 
     @property
     def path(self):
@@ -34,11 +61,11 @@ class Request:
 
     @property
     def query_string(self):
-        return parse_qs(self._uri.query)
+        return format_data(parse_qs(self._query_string))
 
     @property
     def raw_query_string(self):
-        return self._uri.query
+        return self._query_string
 
     @property
     def fragment(self):

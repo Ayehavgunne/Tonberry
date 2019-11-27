@@ -12,7 +12,7 @@ class Handler:
     def __init__(self, app: "App", scope: Dict):
         self.app = app
         self.scope = scope
-        self.request = Request(scope)
+        # self.request = Request(scope)
 
     async def __call__(self, recieve: Callable, send: Callable) -> None:
         pass
@@ -23,7 +23,7 @@ class HTTPHandler(Handler):
         super().__init__(app, scope)
 
     async def __call__(self, recieve: Callable, send: Callable) -> None:
-        request = Request(self.scope)
+        request = Request(self.scope, recieve)
         await self.handle_request(request, send)
 
     async def handle_request(self, request: Request, send: Callable):
