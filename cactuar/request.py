@@ -1,26 +1,27 @@
-from typing import Dict, Optional, Callable
-from urllib.parse import urlparse, parse_qs, ParseResult
+from typing import Dict, Optional, Union, Any, Tuple, AsyncGenerator, AnyStr
+from urllib.parse import urlparse, parse_qs, ParseResult, ParseResultBytes
 
 from cactuar.headers import Header
-from cactuar.route_tree import Node
+from cactuar.types import TreePart, Receive, Scope
 from cactuar.util import format_data
 
 
 class Request:
-    def __init__(self, scope: Dict, recieve: Callable):
+    def __init__(self, scope: Scope, recieve: Receive):
         self._recieve = recieve
-        self.method = scope.get("method")
+        self.method: str = str(scope.get("method"))
         self.type = scope.get("type")
-        self._uri: ParseResult = urlparse(scope.get("path"))
+        self._uri: Union[ParseResult, ParseResultBytes] = urlparse(scope.get("path"))
         self.raw_uri = scope.get("raw_path")
         self.root_path = scope.get("root_path")
+        self.client: Tuple[str, str] = scope.get("client")
         self._query_string = scope.get("query_string")
         self._body: Optional[bytes] = None
         self.headers = Header(scope.get("headers"))
-        self.current_route: Optional[Node] = None
+        self.current_route: Optional[TreePart] = None
         self._unsearched_path: str = ""
 
-    async def stream(self):
+    async def stream(self) -> AsyncGenerator[bytes, None]:
         while True:
             chunk = await self._recieve()
             if chunk["type"] == "http.request":
@@ -31,7 +32,7 @@ class Request:
                     break
         yield b""
 
-    async def get_body(self):
+    async def get_body(self) -> bytes:
         if self._body is None:
             chunks = []
             async for chunk in self.stream():
@@ -40,52 +41,49 @@ class Request:
         return self._body
 
     @property
-    def body(self):
+    def body(self) -> Optional[bytes]:
         return self._body
 
     @property
-    def path(self):
+    def path(self) -> Union[str, bytes]:
         return self._uri.path
 
     @property
-    def scheme(self):
+    def scheme(self) -> Union[str, bytes]:
         return self._uri.scheme
 
     @property
-    def netloc(self):
+    def netloc(self) -> AnyStr:
         return self._uri.netloc
 
     @property
-    def params(self):
+    def params(self) -> AnyStr:
         return self._uri.params
 
     @property
-    def query_string(self):
+    def query_string(self) -> Dict:
         return format_data(parse_qs(self._query_string))
 
     @property
-    def raw_query_string(self):
+    def raw_query_string(self) -> Optional[Any]:
         return self._query_string
 
     @property
-    def fragment(self):
+    def fragment(self) -> str:
         return self._uri.fragment
 
     @property
-    def username(self):
+    def username(self) -> str:
         return self._uri.username
 
     @property
-    def password(self):
+    def password(self) -> str:
         return self._uri.password
 
     @property
-    def hostname(self):
+    def hostname(self) -> str:
         return self._uri.hostname
 
     @property
-    def port(self):
+    def port(self) -> str:
         return self._uri.port
-
-    def _update_uri(self, component: str, replacement: str):
-        self._uri = self._uri._replace(component, replacement)

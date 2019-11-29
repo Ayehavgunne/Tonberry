@@ -1,16 +1,21 @@
-from typing import Dict, Callable
+from typing import Dict
 
-from cactuar.handlers import HTTPHandler, WebSocketHandler, LifespanHandler
+from cactuar.handlers import HTTPHandler, WebSocketHandler, LifespanHandler, Handler
+from cactuar.loggers import create_access_logger
 from cactuar.request import Request
 from cactuar.response import Response
 from cactuar.routers import Router, MethodRouter
+from cactuar.types import Receive, Send
 
 
 class App:
     def __init__(self, router: Router = None):
         self.router = router or MethodRouter(self)
+        self.access_logger = create_access_logger()
 
-    async def __call__(self, scope: Dict, recieve: Callable, send: Callable) -> None:
+    async def __call__(self, scope: Dict, recieve: Receive, send: Send) -> None:
+        # noinspection PyUnusedLocal
+        handler: Handler
         if scope["type"] == "http":
             handler = HTTPHandler(self, scope)
         elif scope["type"] == "websocket":
@@ -24,11 +29,18 @@ class App:
             )
         await handler(recieve, send)
 
-    def startup(self):
+    def startup(self) -> None:
         pass
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         pass
 
     async def handle_request(self, request: Request) -> Response:
-        return await self.router.handle_request(request)
+        response = await self.router.handle_request(request)
+        self.access_logger.info(
+            f"{request.client[0]}:{request.client[1]} {response.status} {request.path}"
+        )
+        return response
+
+    async def handle_exception(self, error: Exception) -> None:
+        pass

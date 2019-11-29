@@ -1,16 +1,18 @@
 import json
 import urllib.parse
+from collections import namedtuple
 from dataclasses import is_dataclass
 import inspect
-from typing import TYPE_CHECKING, Union, Dict, Optional, Type, List, Callable
+from io import IOBase, TextIOBase
+from typing import TYPE_CHECKING, Dict, Optional, Type, List, Callable, Any
 
-import dacite
+import dacite  # type: ignore
 
-from cactuar.exceptions import HTTPError
+from cactuar.exceptions import HTTPError, FigureItOutLaterException
 from cactuar.expose import _Expose
 from cactuar.request import Request
 from cactuar.response import Response
-from cactuar.route_tree import Branch, Leaf, TreePart
+from cactuar.types import Branch, Leaf, TreePart
 from cactuar.util import DataClassEncoder, format_data
 
 if TYPE_CHECKING:
@@ -20,6 +22,7 @@ if TYPE_CHECKING:
 class Router:
     def __init__(self, app: "App"):
         self.app = app
+        self.root: Optional[Type] = None
 
     async def handle_request(self, request: Request) -> Response:
         pass
@@ -29,7 +32,7 @@ class MethodRouter(Router):
     def __init__(self, app):
         super().__init__(app)
         self._root: Optional[Type] = None
-        self._tree: Optional[Branch] = None
+        self._tree: Optional[TreePart] = None
         self.method_registration = _Expose._registrar
 
     @property
@@ -43,17 +46,16 @@ class MethodRouter(Router):
 
     async def handle_request(self, request: Request) -> Response:
         response = Response()
-        response.body = bytes(await self._dispatch(request), "utf-8")
+        response.body = await self._dispatch(request)
         return response
 
-    async def _dispatch(self, request: Request) -> Union[str, bytes, Dict]:
+    async def _dispatch(self, request: Request) -> bytes:
         func = self.get_func(request)
         return await self.call_func(request, func)
 
     @staticmethod
-    async def call_func(request: Request, func: Callable):
-        args = [request.current_route.class_instance]
-        kwargs = {}
+    async def get_kwargs(request: Request) -> Dict:
+        kwargs: Dict[str, Any] = {}
         body = await request.get_body()
         try:
             content_type = request.headers["content-type"]
@@ -68,7 +70,14 @@ class MethodRouter(Router):
 
         if request.query_string:
             kwargs.update(request.query_string)
+        return kwargs
 
+    @staticmethod
+    def get_args(request: Request) -> List[Any]:
+        if request.current_route is not None:
+            args: List[Any] = [request.current_route.class_instance]
+        else:
+            args = []
         args.extend(
             [
                 path
@@ -76,8 +85,16 @@ class MethodRouter(Router):
                 if path and path != "index"
             ]
         )
+        return args
 
-        arg_types = {"positional": args, "keyword": {}}
+    async def call_func(self, request: Request, func: Callable) -> bytes:
+        kwargs = await self.get_kwargs(request)
+        args = self.get_args(request)
+
+        ArgTypes = namedtuple("ArgTypes", "positional keyword")
+        arg_types = ArgTypes(args, {})
+        # arg_types.positional: List[Any] = args
+        # arg_types.keyword: Dict[str, Any] = {}
         params = inspect.signature(func).parameters
         var_pos = False
         var_keyword = False
@@ -91,16 +108,16 @@ class MethodRouter(Router):
                 for key in list(kwargs.keys()):
                     if hasattr(instance, key):
                         del kwargs[key]
-                arg_types["positional"].append(instance)
+                arg_types.positional.append(instance)
             if name in kwargs:
                 if param.kind in (
                     inspect.Parameter.POSITIONAL_ONLY,
                     inspect.Parameter.POSITIONAL_OR_KEYWORD,
                     inspect.Parameter.VAR_POSITIONAL,
                 ):
-                    arg_types["positional"].append(kwargs.pop(name))
+                    arg_types.positional.append(kwargs.pop(name))
                 else:
-                    arg_types["keyword"][name] = kwargs.pop(name)
+                    arg_types.keyword[name] = kwargs.pop(name)
             if param.kind == inspect.Parameter.VAR_POSITIONAL:
                 var_pos = True
             if param.kind == inspect.Parameter.VAR_KEYWORD:
@@ -108,25 +125,33 @@ class MethodRouter(Router):
 
         for key in list(kwargs.keys()):
             if var_pos:
-                arg_types["positional"].append(kwargs.pop(key))
+                arg_types.positional.append(kwargs.pop(key))
             elif var_keyword:
-                arg_types["keyword"][key] = kwargs.pop(key)
+                arg_types.keyword[key] = kwargs.pop(key)
 
         if func is not None and not kwargs:
-            result = await func(*arg_types["positional"], **arg_types["keyword"])
-
-            if isinstance(result, (dict, list)) or is_dataclass(result):
-                result = json.dumps(result, cls=DataClassEncoder)
-
-            return result
+            result = await func(*arg_types.positional, **arg_types.keyword)
+            return self.format_response_body(result)
 
         raise HTTPError(404)
+
+    @staticmethod
+    def format_response_body(result) -> bytes:
+        if isinstance(result, (dict, list)) or is_dataclass(result):
+            return json.dumps(result, cls=DataClassEncoder).encode("utf-8")
+        if isinstance(result, TextIOBase):
+            return result.read().encode("utf-8")
+        if isinstance(result, IOBase):
+            return b"".join(result.readlines())
+        raise NotImplementedError
 
     def get_func(self, request: Request) -> Callable:
         http_method = request.method
         url_path = request.path
         paths = [urllib.parse.unquote(pth) for pth in url_path.split("/") if pth != ""]
         paths.append("index")
+        if self._tree is None:
+            raise FigureItOutLaterException
         route = self._tree
         level = 0
         while isinstance(route, Branch):
@@ -137,7 +162,10 @@ class MethodRouter(Router):
         if route:
             request._unsearched_path = "/".join(paths[level:])
             request.current_route = route
-            return route.route_mapping.func
+            if route.route_mapping.func is not None:
+                return route.route_mapping.func
+            else:
+                raise FigureItOutLaterException
         else:
             raise HTTPError(404)
 
@@ -152,9 +180,10 @@ class MethodRouter(Router):
                         return route
                 elif isinstance(route, Branch):
                     return route
+        raise HTTPError(404)
 
     def build_tree(self, cls: Type) -> List[TreePart]:
-        children = []
+        children: List[TreePart] = []
 
         for key, value in cls.__class__.__dict__.items():
             if not key.startswith("_"):

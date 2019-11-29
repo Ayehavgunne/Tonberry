@@ -1,5 +1,5 @@
 import sys
-from typing import Callable
+from typing import Callable, Union, Optional
 
 from cactuar.models import Methods, RouteMapping
 
@@ -7,16 +7,21 @@ from cactuar.models import Methods, RouteMapping
 class _Expose:
     _registrar = Methods()
 
-    def __call__(self, func):
+    def __call__(self, func: Callable) -> None:
         self.get(func)
 
     @classmethod
-    def _new_registrar(cls):
+    def _new_registrar(cls) -> None:
         cls._registrar = Methods()
 
     @classmethod
-    def _register(cls, func: Callable, http_method: str, route: str = None) -> None:
-        if route is None:
+    def _register(
+        cls,
+        func: Callable,
+        http_method: str,
+        route: Optional[Union[str, Callable]] = None,
+    ) -> None:
+        if route is None or not isinstance(route, str):
             route = func.__name__
         parents = sys._getframe(3).f_locals
         qual_name = None
@@ -29,8 +34,8 @@ class _Expose:
         )
 
     @classmethod
-    def get(cls, route: str = None) -> Callable:
-        def wrapper(wrapped_func: Callable):
+    def get(cls, route: Union[str, Callable] = None) -> Callable:
+        def wrapper(wrapped_func: Callable) -> Callable:
             cls._register(wrapped_func, "GET", route)
             return wrapped_func
 
@@ -42,8 +47,8 @@ class _Expose:
             return wrapper
 
     @classmethod
-    def post(cls, route: str = None) -> Callable:
-        def wrapper(wrapped_func):
+    def post(cls, route: Union[str, Callable] = None) -> Callable:
+        def wrapper(wrapped_func: Callable) -> Callable:
             cls._register(wrapped_func, "POST", route)
             return wrapped_func
 
@@ -55,8 +60,8 @@ class _Expose:
             return wrapper
 
     @classmethod
-    def put(cls, route: str = None) -> Callable:
-        def wrapper(wrapped_func):
+    def put(cls, route: Union[str, Callable] = None) -> Callable:
+        def wrapper(wrapped_func: Callable) -> Callable:
             cls._register(wrapped_func, "PUT", route)
             return wrapped_func
 
@@ -68,8 +73,8 @@ class _Expose:
             return wrapper
 
     @classmethod
-    def delete(cls, route: str = None) -> Callable:
-        def wrapper(wrapped_func):
+    def delete(cls, route: Union[str, Callable] = None) -> Callable:
+        def wrapper(wrapped_func: Callable) -> Callable:
             cls._register(wrapped_func, "DELETE", route)
             return wrapped_func
 
@@ -81,8 +86,8 @@ class _Expose:
             return wrapper
 
     @classmethod
-    def patch(cls, route: str = None) -> Callable:
-        def wrapper(wrapped_func):
+    def patch(cls, route: Union[str, Callable] = None) -> Callable:
+        def wrapper(wrapped_func: Callable) -> Callable:
             cls._register(wrapped_func, "PATCH", route)
             return wrapped_func
 
@@ -94,8 +99,8 @@ class _Expose:
             return wrapper
 
     @classmethod
-    def head(cls, route: str = None) -> Callable:
-        def wrapper(wrapped_func):
+    def head(cls, route: Union[str, Callable] = None) -> Callable:
+        def wrapper(wrapped_func: Callable) -> Callable:
             cls._register(wrapped_func, "HEAD", route)
             return wrapped_func
 
@@ -107,8 +112,8 @@ class _Expose:
             return wrapper
 
     @classmethod
-    def options(cls, route: str = None) -> Callable:
-        def wrapper(wrapped_func):
+    def options(cls, route: Union[str, Callable] = None) -> Callable:
+        def wrapper(wrapped_func: Callable) -> Callable:
             cls._register(wrapped_func, "OPTIONS", route)
             return wrapped_func
 

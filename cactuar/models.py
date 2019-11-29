@@ -1,16 +1,16 @@
 from dataclasses import dataclass, field
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 
 @dataclass
 class RouteMapping:
     route: str = ""
-    func: Callable = None
-    module_name: str = None
-    qual_name: str = None
-    http_method: str = None
+    func: Optional[Callable] = None
+    module_name: Optional[str] = None
+    qual_name: Optional[str] = None
+    http_method: Optional[str] = None
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return (
             True
             if self.route
@@ -29,7 +29,7 @@ class RouteMappings:
 
     def get_map_by_func(self, func_name: str, parent_name: str = None) -> RouteMapping:
         for mapping in self.mappings:
-            if mapping.func.__name__ == func_name:
+            if mapping.func and mapping.func.__name__ == func_name:
                 if parent_name:
                     if mapping.qual_name == parent_name:
                         return mapping
@@ -58,7 +58,7 @@ class Methods:
     HEAD: RouteMappings
     OPTIONS: RouteMappings
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.GET = RouteMappings(http_method="GET")
         self.POST = RouteMappings(http_method="POST")
         self.PUT = RouteMappings(http_method="PUT")
@@ -67,7 +67,7 @@ class Methods:
         self.HEAD = RouteMappings(http_method="HEAD")
         self.OPTIONS = RouteMappings(http_method="OPTIONS")
 
-    def get(self, http_method: str):
+    def get(self, http_method: str) -> RouteMappings:
         if hasattr(self, http_method):
             return getattr(self, http_method)
         else:

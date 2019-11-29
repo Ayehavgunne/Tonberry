@@ -1,10 +1,10 @@
 import json
 from dataclasses import is_dataclass, asdict
-from typing import Dict, Union
+from typing import Dict, Union, Any
 
 
 class DataClassEncoder(json.JSONEncoder):
-    def default(self, obj):
+    def default(self, obj: Any) -> Dict[str, Any]:
         if is_dataclass(obj):
             return asdict(obj)
         return json.JSONEncoder.default(self, obj)

@@ -605,4 +605,5 @@ DerivedData/
 !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 
-/cactuar/test.py
+test.py
+test.html
