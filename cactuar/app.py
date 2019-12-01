@@ -37,9 +37,9 @@ class App:
 
     async def handle_request(self, request: Request) -> Response:
         response = await self.router.handle_request(request)
-        self.access_logger.info(
-            f"{request.client[0]}:{request.client[1]} {response.status} {request.path}"
-        )
+        self.access_logger.set_request_obj(request)
+        self.access_logger.set_response_obj(response)
+        self.access_logger.info()
         return response
 
     async def handle_exception(self, error: Exception) -> None:

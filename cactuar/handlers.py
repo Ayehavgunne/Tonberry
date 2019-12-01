@@ -1,27 +1,23 @@
 import asyncio
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
 
 from cactuar.exceptions import CactuarException
 from cactuar.request import Request
 from cactuar.response import Response
-from cactuar.types import Send, Receive
+from cactuar.types import Send, Receive, Scope
 
 if TYPE_CHECKING:
     from cactuar.app import App
 
 
 class Handler:
-    def __init__(self, app: "App", scope: Dict):
+    def __init__(self, app: "App", scope: Scope):
         self.app = app
         self.scope = scope
-        # self.request = Request(scope)
-
-    async def __call__(self, recieve: Receive, send: Send) -> None:
-        pass
 
 
 class HTTPHandler(Handler):
-    def __init__(self, app, scope):
+    def __init__(self, app: "App", scope: Scope):
         super().__init__(app, scope)
 
     async def __call__(self, recieve: Receive, send: Send) -> None:
@@ -31,7 +27,7 @@ class HTTPHandler(Handler):
         except CactuarException as err:
             await self.app.handle_exception(err)
 
-    async def handle_request(self, request: Request, send: Send):
+    async def handle_request(self, request: Request, send: Send) -> None:
         response: Response = await self.app.handle_request(request)
         response.headers.set_cookie(
             "something", "good", path=request.path, domain=request.hostname
@@ -58,7 +54,7 @@ class HTTPHandler(Handler):
 
 
 class WebSocketHandler(Handler):
-    def __init__(self, app, scope):
+    def __init__(self, app: "App", scope: Scope):
         super().__init__(app, scope)
 
     async def __call__(self, recieve: Receive, send: Send) -> None:
@@ -66,7 +62,7 @@ class WebSocketHandler(Handler):
 
 
 class LifespanHandler(Handler):
-    def __init__(self, app, scope):
+    def __init__(self, app: "App", scope: Scope):
         super().__init__(app, scope)
 
     async def __call__(self, recieve: Receive, send: Send) -> None:

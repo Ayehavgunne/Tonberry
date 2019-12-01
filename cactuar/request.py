@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union, Any, Tuple, AsyncGenerator, AnyStr
+from typing import Dict, Optional, Union, Any, Tuple, AsyncGenerator
 from urllib.parse import urlparse, parse_qs, ParseResult, ParseResultBytes
 
 from cactuar.headers import Header
@@ -14,7 +14,7 @@ class Request:
         self._uri: Union[ParseResult, ParseResultBytes] = urlparse(scope.get("path"))
         self.raw_uri = scope.get("raw_path")
         self.root_path = scope.get("root_path")
-        self.client: Tuple[str, str] = scope.get("client")
+        self.client: Tuple[str, str] = scope.get("client")  # type: ignore
         self._query_string = scope.get("query_string")
         self._body: Optional[bytes] = None
         self.headers = Header(scope.get("headers"))
@@ -53,11 +53,11 @@ class Request:
         return self._uri.scheme
 
     @property
-    def netloc(self) -> AnyStr:
+    def netloc(self) -> Union[str, bytes]:
         return self._uri.netloc
 
     @property
-    def params(self) -> AnyStr:
+    def params(self) -> Union[str, bytes]:
         return self._uri.params
 
     @property
@@ -65,25 +65,25 @@ class Request:
         return format_data(parse_qs(self._query_string))
 
     @property
-    def raw_query_string(self) -> Optional[Any]:
+    def raw_query_string(self) -> Any:
         return self._query_string
 
     @property
-    def fragment(self) -> str:
+    def fragment(self) -> Union[str, bytes]:
         return self._uri.fragment
 
     @property
-    def username(self) -> str:
+    def username(self) -> Optional[Union[str, bytes]]:
         return self._uri.username
 
     @property
-    def password(self) -> str:
+    def password(self) -> Optional[Union[str, bytes]]:
         return self._uri.password
 
     @property
-    def hostname(self) -> str:
+    def hostname(self) -> Optional[Union[str, bytes]]:
         return self._uri.hostname
 
     @property
-    def port(self) -> str:
+    def port(self) -> Optional[int]:
         return self._uri.port

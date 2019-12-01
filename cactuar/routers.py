@@ -22,27 +22,29 @@ if TYPE_CHECKING:
 class Router:
     def __init__(self, app: "App"):
         self.app = app
-        self.root: Optional[Type] = None
-
-    async def handle_request(self, request: Request) -> Response:
-        pass
-
-
-class MethodRouter(Router):
-    def __init__(self, app):
-        super().__init__(app)
         self._root: Optional[Type] = None
         self._tree: Optional[TreePart] = None
-        self.method_registration = _Expose._registrar
 
     @property
-    def root(self):
+    def root(self) -> Optional[Type]:
         return self._root
 
     @root.setter
-    def root(self, root: Type):
+    def root(self, root: Type) -> None:
         self._root = root
         self._tree = Branch("", root, self.build_tree(root))
+
+    async def handle_request(self, request: Request) -> Response:
+        raise NotImplementedError
+
+    def build_tree(self, cls: Type) -> List[TreePart]:
+        raise NotImplementedError
+
+
+class MethodRouter(Router):
+    def __init__(self, app: "App"):
+        super().__init__(app)
+        self.method_registration = _Expose._registrar
 
     async def handle_request(self, request: Request) -> Response:
         response = Response()
@@ -136,18 +138,23 @@ class MethodRouter(Router):
         raise HTTPError(404)
 
     @staticmethod
-    def format_response_body(result) -> bytes:
+    def format_response_body(result: Any) -> bytes:
         if isinstance(result, (dict, list)) or is_dataclass(result):
             return json.dumps(result, cls=DataClassEncoder).encode("utf-8")
         if isinstance(result, TextIOBase):
             return result.read().encode("utf-8")
         if isinstance(result, IOBase):
             return b"".join(result.readlines())
+        if isinstance(result, str):
+            return result.encode("utf-8")
         raise NotImplementedError
 
     def get_func(self, request: Request) -> Callable:
         http_method = request.method
-        url_path = request.path
+        if isinstance(request.path, bytes):
+            url_path = request.path.decode("utf-8")
+        else:
+            url_path = request.path
         paths = [urllib.parse.unquote(pth) for pth in url_path.split("/") if pth != ""]
         paths.append("index")
         if self._tree is None:
@@ -159,7 +166,7 @@ class MethodRouter(Router):
                 raise HTTPError(404)
             route = self.match_route(paths[level], route.children, http_method)
             level += 1
-        if route:
+        if route and isinstance(route, Leaf):
             request._unsearched_path = "/".join(paths[level:])
             request.current_route = route
             if route.route_mapping.func is not None:

@@ -14,14 +14,14 @@ def create_app(router: "Router" = None) -> "App":
     return app_instance
 
 
-def quick_start(root: Type) -> None:
+def quick_start(root: Type, host: str = "localhost", port: str = "8080") -> None:
     import asyncio
 
-    from hypercorn.config import Config
-    from hypercorn.asyncio import serve
+    from hypercorn.config import Config  # type: ignore
+    from hypercorn.asyncio import serve  # type: ignore
 
     config = Config()
-    config.bind = ["10.0.0.11:8080"]
+    config.bind = [f"{host}:{port}"]
 
     quick_app = create_app()
     quick_app.router.root = root()

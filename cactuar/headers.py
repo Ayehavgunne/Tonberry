@@ -1,6 +1,6 @@
 from datetime import datetime
 from http.cookies import SimpleCookie
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Union
 
 # TODO: Account for user added headers
 # TODO: Create subclass of Header for responses
@@ -52,8 +52,8 @@ class Header:
         self,
         key: str,
         morsel: str,
-        path: str = None,
-        domain: str = None,
+        path: Union[str, bytes] = None,
+        domain: Union[str, bytes] = None,
         secure: bool = False,
         expires: datetime = None,
         max_age: int = None,
