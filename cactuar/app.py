@@ -1,7 +1,7 @@
 from typing import Dict
 
 from cactuar.handlers import HTTPHandler, WebSocketHandler, LifespanHandler, Handler
-from cactuar.loggers import create_access_logger
+from cactuar.loggers import create_access_logger, create_app_logger
 from cactuar.request import Request
 from cactuar.response import Response
 from cactuar.routers import Router, MethodRouter
@@ -12,6 +12,7 @@ class App:
     def __init__(self, router: Router = None):
         self.router = router or MethodRouter(self)
         self.access_logger = create_access_logger()
+        self.app_logger = create_app_logger()
 
     async def __call__(self, scope: Dict, recieve: Receive, send: Send) -> None:
         # noinspection PyUnusedLocal
@@ -41,6 +42,3 @@ class App:
         self.access_logger.set_response_obj(response)
         self.access_logger.info()
         return response
-
-    async def handle_exception(self, error: Exception) -> None:
-        pass

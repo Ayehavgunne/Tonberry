@@ -30,8 +30,8 @@ class Header:
         if item in self.__header_attrs:
             return self.__header_attrs[item]
 
-    def __setitem__(self, key: str, value: str) -> None:
-        self.__header_attrs[key] = value
+    def __setitem__(self, key: str, value: Union[str, int]) -> None:
+        self.__header_attrs[key] = str(value)
 
     def encode(self) -> List[Tuple[bytes, bytes]]:
         raw_header = []

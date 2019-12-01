@@ -16,7 +16,7 @@ from cactuar.types import Branch, Leaf, TreePart
 from cactuar.util import DataClassEncoder, format_data
 
 if TYPE_CHECKING:
-    from cactuar.app import App
+    from cactuar.app import App  # pytype: disable=pyi-error
 
 
 class Router:
@@ -44,10 +44,12 @@ class Router:
 class MethodRouter(Router):
     def __init__(self, app: "App"):
         super().__init__(app)
+        # noinspection PyProtectedMember
         self.method_registration = _Expose._registrar
 
     async def handle_request(self, request: Request) -> Response:
         response = Response()
+        response.status = 200
         response.body = await self._dispatch(request)
         return response
 
@@ -80,6 +82,7 @@ class MethodRouter(Router):
             args: List[Any] = [request.current_route.class_instance]
         else:
             args = []
+        # noinspection PyProtectedMember
         args.extend(
             [
                 path
@@ -95,8 +98,6 @@ class MethodRouter(Router):
 
         ArgTypes = namedtuple("ArgTypes", "positional keyword")
         arg_types = ArgTypes(args, {})
-        # arg_types.positional: List[Any] = args
-        # arg_types.keyword: Dict[str, Any] = {}
         params = inspect.signature(func).parameters
         var_pos = False
         var_keyword = False

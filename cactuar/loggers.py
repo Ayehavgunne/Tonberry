@@ -20,6 +20,9 @@ class CactuarLogger(Logger):
     def info(self, msg: str = "", *args, **kwargs) -> None:  # type: ignore
         super().info(msg, *args, **kwargs)
 
+    def error(self, msg: str = "", *args, **kwargs) -> None:  # type: ignore
+        super().error(msg, *args, **kwargs)
+
     # noinspection PyTypeHints
     def makeRecord(  # type: ignore
         self,
@@ -48,7 +51,18 @@ class CactuarLogger(Logger):
 def create_access_logger() -> CactuarLogger:
     logger = CactuarLogger("ct_access", INFO)
     handler = StreamHandler()
-    formatter = Formatter("{asctime} {client} {status} {path} {message}", style="{")
+    formatter = Formatter(
+        "{asctime} {levelname} {client} {status} {path} {message}", style="{"
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
+
+
+def create_app_logger() -> CactuarLogger:
+    logger = CactuarLogger("ct_app", INFO)
+    handler = StreamHandler()
+    formatter = Formatter("{asctime} {levelname} {message}", style="{")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     return logger

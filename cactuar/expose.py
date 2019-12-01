@@ -5,14 +5,14 @@ from cactuar.models import Methods, RouteMapping
 
 
 class _Expose:
-    _registrar = Methods()
+    _registrar = Methods()  # pytype: disable=missing-parameter
 
     def __call__(self, func: Callable) -> None:
         self.get(func)
 
     @classmethod
     def _new_registrar(cls) -> None:
-        cls._registrar = Methods()
+        cls._registrar = Methods()  # pytype: disable=missing-parameter
 
     @classmethod
     def _register(
