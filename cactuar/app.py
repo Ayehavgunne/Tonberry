@@ -1,23 +1,21 @@
-# import asyncio
-from typing import Dict, Callable
+from typing import Dict
 
-# from hypercorn.config import Config
-# from hypercorn.asyncio import serve
-
-from cactuar.handlers import HTTPHandler, WebSocketHandler, LifespanHandler
+from cactuar.handlers import HTTPHandler, WebSocketHandler, LifespanHandler, Handler
+from cactuar.loggers import create_access_logger
 from cactuar.request import Request
 from cactuar.response import Response
 from cactuar.routers import Router, MethodRouter
-
-# config = Config()
-# config.bind = ["localhost:8080"]
+from cactuar.types import Receive, Send
 
 
 class App:
     def __init__(self, router: Router = None):
         self.router = router or MethodRouter(self)
+        self.access_logger = create_access_logger()
 
-    async def __call__(self, scope: Dict, recieve: Callable, send: Callable) -> None:
+    async def __call__(self, scope: Dict, recieve: Receive, send: Send) -> None:
+        # noinspection PyUnusedLocal
+        handler: Handler
         if scope["type"] == "http":
             handler = HTTPHandler(self, scope)
         elif scope["type"] == "websocket":
@@ -31,15 +29,18 @@ class App:
             )
         await handler(recieve, send)
 
-    def startup(self):
+    def startup(self) -> None:
         pass
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         pass
 
     async def handle_request(self, request: Request) -> Response:
-        return await self.router.handle_request(request)
+        response = await self.router.handle_request(request)
+        self.access_logger.set_request_obj(request)
+        self.access_logger.set_response_obj(response)
+        self.access_logger.info()
+        return response
 
-
-# if __name__ == "__main__":
-#     asyncio.run(serve(App(), config))
+    async def handle_exception(self, error: Exception) -> None:
+        pass
