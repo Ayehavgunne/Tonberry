@@ -2,6 +2,7 @@ from typing import Dict, Optional, Union, Any, Tuple, AsyncGenerator
 from urllib.parse import urlparse, parse_qs, ParseResult, ParseResultBytes
 
 from cactuar.headers import Header
+from cactuar.contexed.session import Session
 from cactuar.types import TreePart, Receive, Scope
 from cactuar.util import format_data
 
@@ -19,6 +20,7 @@ class Request:
         self._body: Optional[bytes] = None
         self.headers = Header(scope.get("headers"))
         self.current_route: Optional[TreePart] = None
+        self.session: Optional[Session] = None
         self._unsearched_path: str = ""
 
     async def stream(self) -> AsyncGenerator[bytes, None]:

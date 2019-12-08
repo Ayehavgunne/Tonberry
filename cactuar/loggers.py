@@ -1,8 +1,8 @@
 from logging import Logger, StreamHandler, Formatter, INFO, LogRecord
 from typing import Optional
 
-from cactuar.request import Request
-from cactuar.response import Response
+from cactuar.contexed.request import Request
+from cactuar.contexed.response import Response
 
 
 class CactuarLogger(Logger):

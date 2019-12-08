@@ -1,10 +1,12 @@
 from typing import Dict
+from uuid import UUID
 
 from cactuar.handlers import HTTPHandler, WebSocketHandler, LifespanHandler, Handler
 from cactuar.loggers import create_access_logger, create_app_logger
-from cactuar.request import Request
-from cactuar.response import Response
+from cactuar.contexed.request import Request
+from cactuar.contexed.response import Response
 from cactuar.routers import Router, MethodRouter
+from cactuar.contexed.session import SessionStore, Session
 from cactuar.types import Receive, Send
 
 
@@ -13,6 +15,7 @@ class App:
         self.router = router or MethodRouter(self)
         self.access_logger = create_access_logger()
         self.app_logger = create_app_logger()
+        self.sessions = SessionStore()
 
     async def __call__(self, scope: Dict, recieve: Receive, send: Send) -> None:
         # noinspection PyUnusedLocal
@@ -42,3 +45,7 @@ class App:
         self.access_logger.set_response_obj(response)
         self.access_logger.info()
         return response
+
+    def store_session_id(self, session_id: UUID) -> None:
+        if session_id not in self.sessions:
+            self.sessions[session_id] = Session(session_id)

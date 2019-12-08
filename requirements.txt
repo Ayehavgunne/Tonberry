@@ -1,2 +1,2 @@
-hypercorn
+uvicorn
 dacite

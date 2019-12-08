@@ -1,10 +1,12 @@
 import asyncio
 import traceback
+import uuid
 from typing import TYPE_CHECKING
 
+from cactuar import request as request_context
 from cactuar.exceptions import HTTPError
-from cactuar.request import Request
-from cactuar.response import Response
+from cactuar.contexed.request import Request
+from cactuar.contexed.response import Response
 from cactuar.types import Send, Receive, Scope
 
 if TYPE_CHECKING:
@@ -26,6 +28,7 @@ class HTTPHandler(Handler):
 
     async def __call__(self, recieve: Receive, send: Send) -> None:
         request = Request(self.scope, recieve)
+        request_context.set(request)
         self.app.access_logger.set_request_obj(request)
         try:
             await self.handle_request(request, send)
@@ -43,10 +46,20 @@ class HTTPHandler(Handler):
             await self.handle_exception(response, send)
 
     async def handle_request(self, request: Request, send: Send) -> None:
+        session_id = request.headers.get_cookie("CTSESSIONID")
+        if session_id is not None:
+            session = self.app.sessions[uuid.UUID(str(session_id))]
+            request.session = session
         response: Response = await self.app.handle_request(request)
-        response.headers.set_cookie(
-            "something", "good", path=request.path, domain=request.hostname
-        )
+        if session_id is None:
+            new_session_id = uuid.uuid4()
+            self.app.store_session_id(new_session_id)
+            response.headers.set_cookie(
+                "CTSESSIONID",
+                str(new_session_id),
+                path=request.path,
+                domain=request.hostname,
+            )
         try:
             await asyncio.wait_for(
                 self.respond(send, response), timeout=response.timeout

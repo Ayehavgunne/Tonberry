@@ -10,8 +10,8 @@ import dacite  # type: ignore
 
 from cactuar.exceptions import HTTPError, FigureItOutLaterException
 from cactuar.expose import _Expose
-from cactuar.request import Request
-from cactuar.response import Response
+from cactuar.contexed.request import Request
+from cactuar.contexed.response import Response
 from cactuar.types import Branch, Leaf, TreePart
 from cactuar.util import DataClassEncoder, format_data
 

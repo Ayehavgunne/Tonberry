@@ -1,6 +1,6 @@
 from datetime import datetime
-from http.cookies import SimpleCookie
-from typing import List, Tuple, Dict, Any, Union
+from http.cookies import SimpleCookie, Morsel
+from typing import List, Tuple, Dict, Any, Union, Optional
 
 # TODO: Account for user added headers
 # TODO: Create subclass of Header for responses
@@ -80,3 +80,17 @@ class Header:
             cookie[key]["version"] = version
         cookie_str = str(cookie)
         self.__header_attrs["Set-Cookie"] += cookie_str
+
+    def get_cookie(self, name: str = None) -> Optional[Union[SimpleCookie, Morsel]]:
+        cookie: SimpleCookie = SimpleCookie()
+        if "cookie" in self.__header_attrs:
+            cookie_dough = self.__header_attrs["cookie"]
+            cookie_dough = cookie_dough.replace("Set-Cookie: ", "")
+            cookie.load(cookie_dough)
+            if name is not None:
+                if name in cookie:
+                    return cookie.get(name).value
+                else:
+                    return None
+            return cookie
+        return None
