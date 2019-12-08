@@ -1,16 +1,6 @@
 from datetime import datetime
 from http.cookies import SimpleCookie
-from typing import List, Tuple, Dict, Any, Union
-
-# TODO: Account for user added headers
-# TODO: Create subclass of Header for responses
-# TODO: Organise fields by standard and common non-standard ones
-# https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
-
-HEADER_MAP = {
-    "Host": "host",
-    "Content-Type": "content_type",
-}
+from typing import Dict, List, Optional, Tuple, Union
 
 
 class Header:
@@ -18,24 +8,28 @@ class Header:
         if header is None:
             header = []
         self._header = header
-        self.__header_attrs: Dict[str, str] = {}
+        self._header_attrs: Dict[str, str] = {}
         self.decode()
 
     def __contains__(self, item: str) -> bool:
-        if item in self.__header_attrs:
+        if item in self._header_attrs:
             return True
         return False
 
-    def __getitem__(self, item: str) -> Any:
-        if item in self.__header_attrs:
-            return self.__header_attrs[item]
+    def __getitem__(self, item: str) -> Optional[str]:
+        if item in self._header_attrs:
+            return self._header_attrs[item]
+        return None
 
     def __setitem__(self, key: str, value: Union[str, int]) -> None:
-        self.__header_attrs[key] = str(value)
+        self._header_attrs[key] = str(value)
+
+    def __delitem__(self, key: str) -> None:
+        del self._header_attrs[key]
 
     def encode(self) -> List[Tuple[bytes, bytes]]:
         raw_header = []
-        for header_key, attr in self.__header_attrs.items():
+        for header_key, attr in self._header_attrs.items():
             key = bytes(header_key, "utf-8")
             if attr is None:
                 value = b""
@@ -46,7 +40,7 @@ class Header:
 
     def decode(self) -> None:
         for key, value in self._header:
-            self.__header_attrs[key.decode("utf-8")] = value.decode("utf-8")
+            self._header_attrs[key.decode("utf-8")] = value.decode("utf-8")
 
     def set_cookie(
         self,
@@ -61,7 +55,7 @@ class Header:
         version: str = None,
     ) -> None:
         if "Set-Cookie" not in self:
-            self.__header_attrs["Set-Cookie"] = ""
+            self._header_attrs["Set-Cookie"] = ""
         cookie: SimpleCookie = SimpleCookie()
         cookie[key] = morsel
         if path is not None:
@@ -78,5 +72,18 @@ class Header:
             cookie[key]["comment"] = comment
         if version is not None:
             cookie[key]["version"] = version
-        cookie_str = str(cookie)
-        self.__header_attrs["Set-Cookie"] += cookie_str
+        self._header_attrs["Set-Cookie"] += str(cookie)
+
+    def get_cookie(self, name: str = None) -> Optional[Union[SimpleCookie, str]]:
+        cookie: SimpleCookie = SimpleCookie()
+        if "cookie" in self._header_attrs:
+            cookie_dough = self._header_attrs["cookie"]
+            cookie_dough = cookie_dough.replace("Set-Cookie: ", "")
+            cookie.load(cookie_dough)
+            if name is not None:
+                if name in cookie:
+                    morsel = cookie.get(name)
+                    if morsel is not None:
+                        return morsel.value
+            return cookie
+        return None

@@ -1,4 +1,4 @@
-from typing import List, Union, Type, MutableMapping, Any, Callable, Awaitable
+from typing import Any, Awaitable, Callable, List, MutableMapping, Type, Union
 
 from cactuar.models import RouteMapping
 
@@ -25,11 +25,8 @@ class Leaf(Node):
 
 TreePart = Union[Branch, Leaf]
 
-
 Scope = MutableMapping[str, Any]
 Message = MutableMapping[str, Any]
 
 Receive = Callable[[], Awaitable[Message]]
 Send = Callable[[Message], Awaitable[None]]
-
-ASGIApp = Callable[[Scope, Receive, Send], Awaitable[None]]

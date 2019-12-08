@@ -1,8 +1,11 @@
-from typing import Dict, Optional, Union, Any, Tuple, AsyncGenerator
-from urllib.parse import urlparse, parse_qs, ParseResult, ParseResultBytes
+from typing import Any, AsyncGenerator, Dict, Optional, Tuple, Union
+from urllib.parse import ParseResult, ParseResultBytes, parse_qs, urlparse
 
-from cactuar.headers import Header
-from cactuar.types import TreePart, Receive, Scope
+import user_agents
+from user_agents.parsers import UserAgent
+
+from cactuar.header import Header
+from cactuar.types import Receive, Scope, TreePart
 from cactuar.util import format_data
 
 
@@ -20,6 +23,7 @@ class Request:
         self.headers = Header(scope.get("headers"))
         self.current_route: Optional[TreePart] = None
         self._unsearched_path: str = ""
+        self.user_agent: UserAgent = user_agents.parse(self.headers["user-agent"])
 
     async def stream(self) -> AsyncGenerator[bytes, None]:
         while True:

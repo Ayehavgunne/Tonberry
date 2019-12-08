@@ -1,18 +1,18 @@
 import sys
-from typing import Callable, Union, Optional
+from typing import Callable, Optional, Union
 
 from cactuar.models import Methods, RouteMapping
 
 
 class _Expose:
-    _registrar = Methods()  # pytype: disable=missing-parameter
+    _registrar = Methods()
 
     def __call__(self, func: Callable) -> None:
         self.get(func)
 
     @classmethod
     def _new_registrar(cls) -> None:
-        cls._registrar = Methods()  # pytype: disable=missing-parameter
+        cls._registrar = Methods()
 
     @classmethod
     def _register(
@@ -23,6 +23,7 @@ class _Expose:
     ) -> None:
         if route is None or not isinstance(route, str):
             route = func.__name__
+        # noinspection PyProtectedMember
         parents = sys._getframe(3).f_locals
         qual_name = None
         module_name = None

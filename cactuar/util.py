@@ -1,6 +1,6 @@
 import json
-from dataclasses import is_dataclass, asdict
-from typing import Dict, Union, Any
+from dataclasses import asdict, is_dataclass
+from typing import Any, Dict, Union
 
 
 class DataClassEncoder(json.JSONEncoder):
