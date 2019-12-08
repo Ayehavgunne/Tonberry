@@ -1,4 +1,4 @@
-from typing import Dict, Hashable, Any
+from typing import Any, Dict, Hashable
 from uuid import UUID
 
 
@@ -6,6 +6,9 @@ class Session:
     def __init__(self, session_id: UUID, data: Dict = None):
         self.session_id = session_id
         self.data = data or {}
+
+    def get(self, item: Hashable, default: Any = None) -> Any:
+        return self.data.get(item, default)
 
     def __getitem__(self, item: Hashable) -> Any:
         return self.data[item]

@@ -1,21 +1,11 @@
-from logging import Logger, StreamHandler, Formatter, INFO, LogRecord
-from typing import Optional
+from logging import INFO, Formatter, Logger, LogRecord, StreamHandler
 
-from cactuar.contexed.request import Request
-from cactuar.contexed.response import Response
+from cactuar import request, response
 
 
 class CactuarLogger(Logger):
     def __init__(self, name: str, level: int):
         super().__init__(name, level)
-        self.request: Optional[Request] = None
-        self.response: Optional[Response] = None
-
-    def set_request_obj(self, request: Request) -> None:
-        self.request = request
-
-    def set_response_obj(self, response: Response) -> None:
-        self.response = response
 
     def info(self, msg: str = "", *args, **kwargs) -> None:  # type: ignore
         super().info(msg, *args, **kwargs)
@@ -40,11 +30,9 @@ class CactuarLogger(Logger):
         record = super().makeRecord(
             name, level, fn, lno, msg, args, exc_info, func, extra, sinfo
         )
-        if self.request is not None:
-            record.client: str = self.request.client[0]  # type: ignore
-            record.path = self.request.path  # type: ignore
-        if self.response is not None:  # type: ignore
-            record.status = self.response.status  # type: ignore
+        record.client: str = request.client[0]  # type: ignore
+        record.path = request.path  # type: ignore
+        record.status = response.status  # type: ignore
         return record
 
 

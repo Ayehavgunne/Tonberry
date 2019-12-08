@@ -1,22 +1,22 @@
+import inspect
 import json
 import urllib.parse
 from collections import namedtuple
 from dataclasses import is_dataclass
-import inspect
 from io import IOBase, TextIOBase
-from typing import TYPE_CHECKING, Dict, Optional, Type, List, Callable, Any
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
 
-import dacite  # type: ignore
+import dacite
 
-from cactuar.exceptions import HTTPError, FigureItOutLaterException
-from cactuar.expose import _Expose
 from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
+from cactuar.exceptions import FigureItOutLaterException, HTTPError
+from cactuar.expose import _Expose
 from cactuar.types import Branch, Leaf, TreePart
 from cactuar.util import DataClassEncoder, format_data
 
 if TYPE_CHECKING:
-    from cactuar.app import App  # pytype: disable=pyi-error
+    from cactuar.app import App
 
 
 class Router:
@@ -24,6 +24,7 @@ class Router:
         self.app = app
         self._root: Optional[Type] = None
         self._tree: Optional[TreePart] = None
+        self._response: Response = Response()
 
     @property
     def root(self) -> Optional[Type]:
@@ -34,7 +35,7 @@ class Router:
         self._root = root
         self._tree = Branch("", root, self.build_tree(root))
 
-    async def handle_request(self, request: Request) -> Response:
+    async def handle_request(self, request: Request, response: Response) -> Response:
         raise NotImplementedError
 
     def build_tree(self, cls: Type) -> List[TreePart]:
@@ -47,8 +48,8 @@ class MethodRouter(Router):
         # noinspection PyProtectedMember
         self.method_registration = _Expose._registrar
 
-    async def handle_request(self, request: Request) -> Response:
-        response = Response()
+    async def handle_request(self, request: Request, response: Response) -> Response:
+        self._response = response
         response.status = 200
         response.body = await self._dispatch(request)
         return response
@@ -61,9 +62,8 @@ class MethodRouter(Router):
     async def get_kwargs(request: Request) -> Dict:
         kwargs: Dict[str, Any] = {}
         body = await request.get_body()
-        try:
-            content_type = request.headers["content-type"]
-        except KeyError:
+        content_type = request.headers["content-type"]
+        if content_type is None:
             content_type = ""
 
         if body:
@@ -138,15 +138,22 @@ class MethodRouter(Router):
 
         raise HTTPError(404)
 
-    @staticmethod
-    def format_response_body(result: Any) -> bytes:
+    def format_response_body(self, result: Any) -> bytes:
         if isinstance(result, (dict, list)) or is_dataclass(result):
+            if not self._response.content_type:
+                self._response.content_type = "application/json"
             return json.dumps(result, cls=DataClassEncoder).encode("utf-8")
         if isinstance(result, TextIOBase):
+            if not self._response.content_type:
+                self._response.content_type = "text/html"
             return result.read().encode("utf-8")
         if isinstance(result, IOBase):
+            if not self._response.content_type:
+                self._response.content_type = "text/html"
             return b"".join(result.readlines())
         if isinstance(result, str):
+            if not self._response.content_type:
+                self._response.content_type = "text/plain"
             return result.encode("utf-8")
         raise NotImplementedError
 

@@ -1,12 +1,15 @@
 from typing import Dict
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from cactuar.handlers import HTTPHandler, WebSocketHandler, LifespanHandler, Handler
-from cactuar.loggers import create_access_logger, create_app_logger
+from cactuar import response as response_context
+from cactuar import session as session_context
 from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
-from cactuar.routers import Router, MethodRouter
-from cactuar.contexed.session import SessionStore, Session
+from cactuar.contexed.session import Session, SessionStore
+from cactuar.context_var_manager import set_context_var
+from cactuar.handlers import Handler, HTTPHandler, LifespanHandler, WebSocketHandler
+from cactuar.loggers import create_access_logger, create_app_logger
+from cactuar.routers import MethodRouter, Router
 from cactuar.types import Receive, Send
 
 
@@ -40,12 +43,24 @@ class App:
         pass
 
     async def handle_request(self, request: Request) -> Response:
-        response = await self.router.handle_request(request)
-        self.access_logger.set_request_obj(request)
-        self.access_logger.set_response_obj(response)
+        response = Response()
+        set_context_var(response_context, response)
+        response = await self.router.handle_request(request, response)
         self.access_logger.info()
         return response
 
-    def store_session_id(self, session_id: UUID) -> None:
-        if session_id not in self.sessions:
-            self.sessions[session_id] = Session(session_id)
+    def get_session_id(self, request: Request) -> UUID:
+        sesson_cookie = request.headers.get_cookie("CTSESSIONID")
+        if sesson_cookie is not None:
+            session_id = UUID(str(sesson_cookie))
+            session = self.sessions[session_id]
+            set_context_var(session_context, session)
+            return session_id
+        else:
+            return self.create_session()
+
+    def create_session(self) -> UUID:
+        new_session_id = uuid4()
+        self.sessions[new_session_id] = Session(new_session_id)
+        set_context_var(session_context, self.sessions[new_session_id])
+        return new_session_id

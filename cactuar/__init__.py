@@ -1,14 +1,20 @@
-from _contextvars import ContextVar
 from typing import TYPE_CHECKING, Type
+
+from cactuar.contexed.request import Request
+from cactuar.contexed.response import Response
+from cactuar.contexed.session import Session
+from cactuar.context_var_manager import ContextVarManager
 
 if TYPE_CHECKING:
     from cactuar.app import App
     from cactuar.routers import Router
 
-
-request = ContextVar("request")
-response = ContextVar("response")
-session = ContextVar("session")
+# noinspection PyTypeChecker
+request: Request = ContextVarManager("request")  # type: ignore
+# noinspection PyTypeChecker
+response: Response = ContextVarManager("response")  # type: ignore
+# noinspection PyTypeChecker
+session: Session = ContextVarManager("session")  # type: ignore
 
 
 def create_app(router: "Router" = None) -> "App":
@@ -21,7 +27,7 @@ def create_app(router: "Router" = None) -> "App":
 
 
 def quick_start(root: Type, host: str = "localhost", port: int = 8080) -> None:
-    import uvicorn  # type: ignore
+    import uvicorn
 
     quick_app = create_app()
     quick_app.router.root = root()

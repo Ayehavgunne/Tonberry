@@ -1,4 +1,4 @@
-from typing import List, Union, Type, MutableMapping, Any, Callable, Awaitable
+from typing import Any, Awaitable, Callable, List, MutableMapping, Type, Union
 
 from cactuar.models import RouteMapping
 
