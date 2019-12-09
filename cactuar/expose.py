@@ -124,6 +124,3 @@ class _Expose:
             return wrapper(func)
         else:
             return wrapper
-
-
-expose = _Expose
