@@ -110,7 +110,7 @@ the process for submitting pull requests.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the 
+[SemVer](http://semver.org/) is used for versioning. For the versions available, see the 
 [tags on this repository](https://github.com/Ayehavgunne/Cactuar/tags). 
 
 ## Author
@@ -128,3 +128,12 @@ file for details
 * Quart
 * Starlette
 * uvicorn
+
+## TODO
+- JWT integration
+- Authentication
+- URL generation
+- Configuration
+- Static Files
+- Indicate Content-Type of response from method return type hint (on the fence about 
+  this, could be a fun experiment)
