@@ -30,9 +30,12 @@ class CactuarLogger(Logger):
         record = super().makeRecord(
             name, level, fn, lno, msg, args, exc_info, func, extra, sinfo
         )
-        record.client: str = request.client[0]  # type: ignore
-        record.path = request.path  # type: ignore
-        record.status = response.status  # type: ignore
+        record.client_ip: str = request.client[0]  # type: ignore
+        record.client_port: str = request.client[1]  # type: ignore
+        record.path: str = request.path  # type: ignore
+        record.http_method: str = request.method  # type: ignore
+        record.http_version: str = request.http_version  # type: ignore
+        record.status: int = response.status  # type: ignore
         return record
 
 
@@ -40,7 +43,9 @@ def create_access_logger() -> CactuarLogger:
     logger = CactuarLogger("ct_access", INFO)
     handler = StreamHandler()
     formatter = Formatter(
-        "{asctime} {levelname} {client} {status} {path} {message}", style="{"
+        "{asctime} {levelname} {client_ip}:{client_port} {http_method} "
+        "HTTP/{http_version} {status} {path} {message}",
+        style="{",
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)

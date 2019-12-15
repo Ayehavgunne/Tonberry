@@ -12,8 +12,9 @@ from cactuar.util import format_data
 class Request:
     def __init__(self, scope: Scope, recieve: Receive):
         self._recieve = recieve
-        self.method: str = str(scope.get("method"))
+        self.method = str(scope.get("method"))
         self.type = scope.get("type")
+        self.http_version = scope.get("http_version")
         self._uri: Union[ParseResult, ParseResultBytes] = urlparse(scope.get("path"))
         self.raw_uri = scope.get("raw_path")
         self.root_path = scope.get("root_path")
@@ -24,6 +25,7 @@ class Request:
         self.current_route: Optional[TreePart] = None
         self._unsearched_path: str = ""
         self.user_agent: UserAgent = user_agents.parse(self.headers["user-agent"])
+        self._scope = scope
 
     async def stream(self) -> AsyncGenerator[bytes, None]:
         while True:

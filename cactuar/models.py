@@ -21,6 +21,14 @@ class RouteMapping:
             else False
         )
 
+    def __hash__(self) -> int:
+        return (
+            hash(self.route)
+            ^ hash(self.http_method)
+            ^ hash(self.module_name)
+            ^ hash(self.qual_name)
+        )
+
 
 @dataclass
 class RouteMappings:

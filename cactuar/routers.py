@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
 
 import dacite
 
+from cactuar import content_types
 from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
 from cactuar.exceptions import FigureItOutLaterException, HTTPError
@@ -40,6 +41,23 @@ class Router:
 
     def build_tree(self, cls: Type) -> List[TreePart]:
         raise NotImplementedError
+
+    def format_response_body(self, result: Any) -> bytes:
+        if isinstance(result, (dict, list)) or is_dataclass(result):
+            if not self._response.content_type:
+                self._response.content_type = "application/json"
+            return json.dumps(result, cls=DataClassEncoder).encode("utf-8")
+        if isinstance(result, TextIOBase):
+            return result.read().encode("utf-8")
+        if isinstance(result, IOBase):
+            return b"".join(result.readlines())
+        if isinstance(result, str):
+            return result.encode("utf-8")
+        raise NotImplementedError
+
+    def set_content_type_from_annotation(self, annotation) -> None:  # type: ignore
+        if not self._response.content_type and annotation in content_types.ContentTypes:
+            self._response.content_type = content_types.CONTENT_TYPE_MAP[annotation]
 
 
 class MethodRouter(Router):
@@ -98,7 +116,11 @@ class MethodRouter(Router):
 
         ArgTypes = namedtuple("ArgTypes", "positional keyword")
         arg_types = ArgTypes(args, {})
-        params = inspect.signature(func).parameters
+        sig = inspect.signature(func)
+        params = sig.parameters
+        return_annotation = getattr(sig, "return_annotation")
+        if return_annotation:
+            self.set_content_type_from_annotation(return_annotation)
         var_pos = False
         var_keyword = False
         for name, param in params.items():
@@ -137,25 +159,6 @@ class MethodRouter(Router):
             return self.format_response_body(result)
 
         raise HTTPError(404)
-
-    def format_response_body(self, result: Any) -> bytes:
-        if isinstance(result, (dict, list)) or is_dataclass(result):
-            if not self._response.content_type:
-                self._response.content_type = "application/json"
-            return json.dumps(result, cls=DataClassEncoder).encode("utf-8")
-        if isinstance(result, TextIOBase):
-            if not self._response.content_type:
-                self._response.content_type = "text/html"
-            return result.read().encode("utf-8")
-        if isinstance(result, IOBase):
-            if not self._response.content_type:
-                self._response.content_type = "text/html"
-            return b"".join(result.readlines())
-        if isinstance(result, str):
-            if not self._response.content_type:
-                self._response.content_type = "text/plain"
-            return result.encode("utf-8")
-        raise NotImplementedError
 
     def get_func(self, request: Request) -> Callable:
         http_method = request.method
@@ -211,7 +214,7 @@ class MethodRouter(Router):
                 ):
                     children.append(Branch(key, value, self.build_tree(value)))
                 elif inspect.ismethod(value) or inspect.isfunction(value):
-                    mappings = [
+                    mappings = {
                         self.method_registration.GET.get_map_by_func(
                             value.__name__, cls.__class__.__name__
                         ),
@@ -233,10 +236,10 @@ class MethodRouter(Router):
                         self.method_registration.OPTIONS.get_map_by_func(
                             value.__name__, cls.__class__.__name__
                         ),
-                    ]
-                    mappings = [mapp for mapp in mappings if mapp]
-                    for mapp in mappings:
-                        children.append(Leaf(mapp.route, cls, mapp))
+                    }
+                    mappings = {mapping for mapping in mappings if mapping}
+                    for mapping in mappings:
+                        children.append(Leaf(mapping.route, cls, mapping))
 
         return children
 
@@ -257,11 +260,3 @@ class MethodRouter(Router):
     #         else:
     #             break
     #     return f"/{reversed_url}"
-    #
-    # @classmethod
-    # def get_route(cls):
-    #     if hasattr(cls, "ROUTE"):
-    #         route = cls.ROUTE
-    #     else:
-    #         route = cls.__name__.replace("Handler", "").lower()
-    #     return route
