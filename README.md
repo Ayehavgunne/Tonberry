@@ -31,7 +31,7 @@ quick_start(Root)
 ```python
 from dataclasses import dataclass
 
-from cactuar import quick_start, expose
+from cactuar import quick_start, expose, File
 from cactuar.content_types import TextPlain, TextHTML, ApplicationJson
 
 
@@ -103,7 +103,7 @@ class Root:
 
         URL: http://127.0.0.1:8888/somepage
         """
-        return open('some_page.html')
+        return File('some_page.html')
 
     @expose.post
     async def do_a_thing(self, data1: int, data2: str) -> ApplicationJson:
@@ -155,5 +155,3 @@ file for details
 - URL generation
 - Configuration
 - Static Files
-- Indicate Content-Type of response from method return type hint (on the fence about 
-  this, could be a fun experiment)

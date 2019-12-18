@@ -1,82 +1,92 @@
 from typing import IO, TypeVar
 
-TextHTML = TypeVar("TextHTML", str, bytes, IO)
-TextPlain = TypeVar("TextPlain", str, bytes, IO)
-TextCss = TypeVar("TextCss", str, bytes, IO)
-TextCsv = TypeVar("TextCsv", str, bytes, IO)
-TextJavaScript = TypeVar("TextJavaScript", str, bytes, IO)
-TextXml = TypeVar("TextXml", str, bytes, IO)
+from cactuar import File
 
-ApplicationJavaArchive = TypeVar("ApplicationJavaArchive", bytes, IO)
-ApplicationEdiX12 = TypeVar("ApplicationEdiX12", str, bytes, IO)
-ApplicationEdiFact = TypeVar("ApplicationEdiFact", str, bytes, IO)
-ApplicationJavaScript = TypeVar("ApplicationJavaScript", str, bytes, IO)
-ApplicationOctetStream = TypeVar("ApplicationOctetStream", str, bytes, IO)
-ApplicationOgg = TypeVar("ApplicationOgg", bytes, IO)
-ApplicationPdf = TypeVar("ApplicationPdf", bytes, IO)
-ApplicationXHtmlXml = TypeVar("ApplicationXHtmlXml", str, bytes, IO)
-ApplicationXShockwaveFlash = TypeVar("ApplicationXShockwaveFlash", bytes, IO)
-ApplicationJson = TypeVar("ApplicationJson", str, bytes, dict, list, IO)
-ApplicationLdJson = TypeVar("ApplicationLdJson", str, bytes, IO)
-ApplicationXml = TypeVar("ApplicationXml", str, bytes, IO)
-ApplicationZip = TypeVar("ApplicationZip", bytes, IO)
-ApplicationXWWWFormUrlEncoded = TypeVar("ApplicationXWWWFormUrlEncoded", str, bytes, IO)
+TextHTML = TypeVar("TextHTML", str, bytes, IO, File)
+TextPlain = TypeVar("TextPlain", str, bytes, IO, File)
+TextCss = TypeVar("TextCss", str, bytes, IO, File)
+TextCsv = TypeVar("TextCsv", str, bytes, IO, File)
+TextJavaScript = TypeVar("TextJavaScript", str, bytes, IO, File)
+TextXml = TypeVar("TextXml", str, bytes, IO, File)
+
+ApplicationJavaArchive = TypeVar("ApplicationJavaArchive", bytes, IO, File)
+ApplicationEdiX12 = TypeVar("ApplicationEdiX12", str, bytes, IO, File)
+ApplicationEdiFact = TypeVar("ApplicationEdiFact", str, bytes, IO, File)
+ApplicationJavaScript = TypeVar("ApplicationJavaScript", str, bytes, IO, File)
+ApplicationOctetStream = TypeVar("ApplicationOctetStream", str, bytes, IO, File)
+ApplicationOgg = TypeVar("ApplicationOgg", bytes, IO, File)
+ApplicationPdf = TypeVar("ApplicationPdf", bytes, IO, File)
+ApplicationXHtmlXml = TypeVar("ApplicationXHtmlXml", str, bytes, IO, File)
+ApplicationXShockwaveFlash = TypeVar("ApplicationXShockwaveFlash", bytes, IO, File)
+ApplicationJson = TypeVar("ApplicationJson", str, bytes, dict, list, IO, File)
+ApplicationLdJson = TypeVar("ApplicationLdJson", str, bytes, IO, File)
+ApplicationXml = TypeVar("ApplicationXml", str, bytes, IO, File)
+ApplicationZip = TypeVar("ApplicationZip", bytes, IO, File)
+ApplicationXWWWFormUrlEncoded = TypeVar(
+    "ApplicationXWWWFormUrlEncoded", str, bytes, IO, File
+)
 
 ApplicationVndAndroidPackageArchive = TypeVar(
-    "ApplicationVndAndroidPackageArchive", bytes, IO
+    "ApplicationVndAndroidPackageArchive", bytes, IO, File
 )
 ApplicationVndOasisOpenDocumentText = TypeVar(
-    "ApplicationVndOasisOpenDocumentText", bytes, IO
+    "ApplicationVndOasisOpenDocumentText", bytes, IO, File
 )
 ApplicationVndOasisOpenDocumentSpreadsheet = TypeVar(
-    "ApplicationVndOasisOpenDocumentSpreadsheet", bytes, IO
+    "ApplicationVndOasisOpenDocumentSpreadsheet", bytes, IO, File
 )
 ApplicationVndOasisOpenDocumentPresentation = TypeVar(
-    "ApplicationVndOasisOpenDocumentPresentation", bytes, IO
+    "ApplicationVndOasisOpenDocumentPresentation", bytes, IO, File
 )
 ApplicationVndOasisOpenDocumentGraphics = TypeVar(
-    "ApplicationVndOasisOpenDocumentGraphics", bytes, IO
+    "ApplicationVndOasisOpenDocumentGraphics", bytes, IO, File
 )
-ApplicationVndMsExcel = TypeVar("ApplicationVndMsExcel", bytes, IO)
+ApplicationVndMsExcel = TypeVar("ApplicationVndMsExcel", bytes, IO, File)
 ApplicationVndOpenXmlFormatsOfficeDocumentSpreadsheetmlSheet = TypeVar(
-    "ApplicationVndOpenXmlFormatsOfficeDocumentSpreadsheetmlSheet", bytes, IO
+    "ApplicationVndOpenXmlFormatsOfficeDocumentSpreadsheetmlSheet", bytes, IO, File
 )
-ApplicationVndMsPowerpoint = TypeVar("ApplicationVndMsPowerpoint", bytes, IO)
+ApplicationVndMsPowerpoint = TypeVar("ApplicationVndMsPowerpoint", bytes, IO, File)
 ApplicationVndOpenXmlFormatsOfficeDocumentPresentationmlPresentation = TypeVar(
-    "ApplicationVndOpenXmlFormatsOfficeDocumentPresentationmlPresentation", bytes, IO,
+    "ApplicationVndOpenXmlFormatsOfficeDocumentPresentationmlPresentation",
+    bytes,
+    IO,
+    File,
 )
 ApplicationMsWord = TypeVar("ApplicationMsWord", bytes, IO,)
 ApplicationVndOpenXmlFormatsOfficeDocumentWordProcessingmlDocument = TypeVar(
-    "ApplicationVndOpenXmlFormatsOfficeDocumentWordProcessingmlDocument", bytes, IO,
+    "ApplicationVndOpenXmlFormatsOfficeDocumentWordProcessingmlDocument",
+    bytes,
+    IO,
+    File,
 )
-ApplicationVndMozillaXulXml = TypeVar("ApplicationVndMozillaXulXml", bytes, IO,)
+ApplicationVndMozillaXulXml = TypeVar("ApplicationVndMozillaXulXml", bytes, IO, File)
 
-AudioMpeg = TypeVar("AudioMpeg", bytes, IO)
-AudioXMsWma = TypeVar("AudioXMsWma", bytes, IO)
-AudioVndRnRealAudio = TypeVar("AudioVndRnRealAudio", bytes, IO)
-AudioXWav = TypeVar("AudioXWav", bytes, IO)
+AudioMpeg = TypeVar("AudioMpeg", bytes, IO, File)
+AudioXMsWma = TypeVar("AudioXMsWma", bytes, IO, File)
+AudioVndRnRealAudio = TypeVar("AudioVndRnRealAudio", bytes, IO, File)
+AudioXWav = TypeVar("AudioXWav", bytes, IO, File)
 
-ImageGif = TypeVar("ImageGif", bytes, IO)
-ImageJpeg = TypeVar("ImageJpeg", bytes, IO)
-ImagePng = TypeVar("ImagePng", bytes, IO)
-ImageTiff = TypeVar("ImageTiff", bytes, IO)
-ImageVndMicrosoftIcon = TypeVar("ImageVndMicrosoftIcon", bytes, IO)
-ImageXIcon = TypeVar("ImageXIcon", bytes, IO)
-ImageVndDjvu = TypeVar("ImageVndDjvu", bytes, IO)
-ImageSvgXml = TypeVar("ImageSvgXml", bytes, IO)
+ImageGif = TypeVar("ImageGif", bytes, IO, File)
+ImageJpeg = TypeVar("ImageJpeg", bytes, IO, File)
+ImagePng = TypeVar("ImagePng", bytes, IO, File)
+ImageTiff = TypeVar("ImageTiff", bytes, IO, File)
+ImageVndMicrosoftIcon = TypeVar("ImageVndMicrosoftIcon", bytes, IO, File)
+ImageXIcon = TypeVar("ImageXIcon", bytes, IO, File)
+ImageVndDjvu = TypeVar("ImageVndDjvu", bytes, IO, File)
+ImageSvgXml = TypeVar("ImageSvgXml", bytes, IO, File)
 
-MultipartMixed = TypeVar("MultipartMixed", str, bytes, IO)
-MultipartAlternative = TypeVar("MultipartAlternative", str, bytes, IO)
-MultipartRelated = TypeVar("MultipartRelated", str, bytes, IO)
-MultipartFormData = TypeVar("MultipartFormData", str, bytes, IO)
+MultipartMixed = TypeVar("MultipartMixed", str, bytes, IO, File)
+MultipartAlternative = TypeVar("MultipartAlternative", str, bytes, IO, File)
+MultipartRelated = TypeVar("MultipartRelated", str, bytes, IO, File)
+MultipartFormData = TypeVar("MultipartFormData", str, bytes, IO, File)
 
-VideoMpeg = TypeVar("VideoMpeg", bytes, IO)
-VideoMp4 = TypeVar("VideoMp4", bytes, IO)
-VideoQuicktime = TypeVar("VideoQuicktime", bytes, IO)
-VideoXMsWmv = TypeVar("VideoXMsWmv", bytes, IO)
-VideoXMsVideo = TypeVar("VideoXMsVideo", bytes, IO)
-VideoXFlv = TypeVar("VideoXFlv", bytes, IO)
-VideoWebm = TypeVar("VideoWebm", bytes, IO)
+VideoMpeg = TypeVar("VideoMpeg", bytes, IO, File)
+VideoMp4 = TypeVar("VideoMp4", bytes, IO, File)
+VideoQuicktime = TypeVar("VideoQuicktime", bytes, IO, File)
+VideoXMsWmv = TypeVar("VideoXMsWmv", bytes, IO, File)
+VideoXMsVideo = TypeVar("VideoXMsVideo", bytes, IO, File)
+VideoXFlv = TypeVar("VideoXFlv", bytes, IO, File)
+VideoWebm = TypeVar("VideoWebm", bytes, IO, File)
 
 ContentTypes = [
     TextHTML,

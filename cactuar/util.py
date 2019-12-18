@@ -1,5 +1,9 @@
+import asyncio
 import json
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, is_dataclass
+from functools import partial
+from pathlib import Path
 from typing import Any, Dict, Union
 
 
@@ -10,22 +14,12 @@ class DataClassEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def standardize_data_types(value: Union[str, bytes]) -> str:
+def decode_bytes_to_str(value: Union[str, bytes]) -> str:
     """
-    Will convert any byte strings to UTF-8 strings to be more consistant with the other
-    paramater passing styles (json). Turns any string that is only composed
-    of integers into an int. Turns any string that is convertable to a Decimal or float
-    to a Decimal.
+    Will convert any byte strings to UTF-8 strings
     """
     if isinstance(value, bytes):
         value = value.decode("utf-8")
-    # if value.isnumeric():
-    #     value = int(value)
-    # else:
-    #     try:
-    #         value = decimal.Decimal(value)
-    #     except decimal.InvalidOperation:
-    #         pass
     return value
 
 
@@ -39,8 +33,29 @@ def format_data(kwargs: Dict) -> Dict:
     for key, value in kwargs.items():
         if isinstance(value, list):
             for index, val in enumerate(value):
-                value[index] = standardize_data_types(val)
+                value[index] = decode_bytes_to_str(val)
         if len(value) == 1:
-            value = standardize_data_types(value[0])
-        new_kwargs[standardize_data_types(key)] = value
+            value = decode_bytes_to_str(value[0])
+        new_kwargs[decode_bytes_to_str(key)] = value
     return new_kwargs
+
+
+class File:
+    def __init__(self, path: Union[str, Path]) -> None:
+        if isinstance(path, str):
+            path = Path(path)
+        self.path = path
+        self.chunk_size = 64
+
+    async def read(self) -> bytes:
+        chunks = []
+        loop = asyncio.get_event_loop()
+        pool = ThreadPoolExecutor()
+        open_file = self.path.open("rb")
+        read_func = partial(open_file.read, self.chunk_size)
+        while True:
+            chunk = await loop.run_in_executor(pool, read_func)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        return b"".join(chunks)

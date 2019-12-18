@@ -14,7 +14,7 @@ from cactuar.contexed.response import Response
 from cactuar.exceptions import FigureItOutLaterException, HTTPError
 from cactuar.expose import _Expose
 from cactuar.types import Branch, Leaf, TreePart
-from cactuar.util import DataClassEncoder, format_data
+from cactuar.util import DataClassEncoder, File, format_data
 
 if TYPE_CHECKING:
     from cactuar.app import App
@@ -23,9 +23,42 @@ if TYPE_CHECKING:
 class Router:
     def __init__(self, app: "App"):
         self.app = app
+        self._response: Response = Response()
+
+    async def format_response_body(self, result: Any) -> bytes:
+        if isinstance(result, (dict, list)) or is_dataclass(result):
+            if not self._response.content_type:
+                self._response.content_type = "application/json"
+            return json.dumps(result, cls=DataClassEncoder).encode("utf-8")
+        if isinstance(result, TextIOBase):
+            self.app.app_logger.warning(
+                "open().read() is a blocking operation! Use cactual.File() instead."
+            )
+            return result.read().encode("utf-8")
+        if isinstance(result, IOBase):
+            self.app.app_logger.warning(
+                "open().read() is a blocking operation! Use cactual.File() instead."
+            )
+            return b"".join(result.readlines())
+        if isinstance(result, File):
+            return await result.read()
+        if isinstance(result, str):
+            return result.encode("utf-8")
+        if isinstance(result, bytes):
+            return result
+        raise NotImplementedError
+
+    async def handle_request(self, request: Request, response: Response) -> Response:
+        raise NotImplementedError
+
+
+class MethodRouter(Router):
+    def __init__(self, app: "App"):
+        super().__init__(app)
+        # noinspection PyProtectedMember
+        self.method_registration = _Expose._registrar
         self._root: Optional[Type] = None
         self._tree: Optional[TreePart] = None
-        self._response: Response = Response()
 
     @property
     def root(self) -> Optional[Type]:
@@ -36,35 +69,9 @@ class Router:
         self._root = root
         self._tree = Branch("", root, self.build_tree(root))
 
-    async def handle_request(self, request: Request, response: Response) -> Response:
-        raise NotImplementedError
-
-    def build_tree(self, cls: Type) -> List[TreePart]:
-        raise NotImplementedError
-
-    def format_response_body(self, result: Any) -> bytes:
-        if isinstance(result, (dict, list)) or is_dataclass(result):
-            if not self._response.content_type:
-                self._response.content_type = "application/json"
-            return json.dumps(result, cls=DataClassEncoder).encode("utf-8")
-        if isinstance(result, TextIOBase):
-            return result.read().encode("utf-8")
-        if isinstance(result, IOBase):
-            return b"".join(result.readlines())
-        if isinstance(result, str):
-            return result.encode("utf-8")
-        raise NotImplementedError
-
     def set_content_type_from_annotation(self, annotation) -> None:  # type: ignore
         if not self._response.content_type and annotation in content_types.ContentTypes:
             self._response.content_type = content_types.CONTENT_TYPE_MAP[annotation]
-
-
-class MethodRouter(Router):
-    def __init__(self, app: "App"):
-        super().__init__(app)
-        # noinspection PyProtectedMember
-        self.method_registration = _Expose._registrar
 
     async def handle_request(self, request: Request, response: Response) -> Response:
         self._response = response
@@ -156,7 +163,7 @@ class MethodRouter(Router):
 
         if func is not None and not kwargs:
             result = await func(*arg_types.positional, **arg_types.keyword)
-            return self.format_response_body(result)
+            return await self.format_response_body(result)
 
         raise HTTPError(404)
 
