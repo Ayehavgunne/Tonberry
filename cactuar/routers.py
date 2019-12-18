@@ -13,7 +13,7 @@ from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
 from cactuar.exceptions import FigureItOutLaterException, HTTPError
 from cactuar.expose import _Expose
-from cactuar.types import Branch, Leaf, TreePart
+from cactuar.models import Branch, Leaf, TreePart
 from cactuar.util import DataClassEncoder, File, format_data
 
 if TYPE_CHECKING:

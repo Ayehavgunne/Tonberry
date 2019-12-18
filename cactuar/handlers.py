@@ -8,7 +8,7 @@ from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
 from cactuar.context_var_manager import set_context_var
 from cactuar.exceptions import HTTPError
-from cactuar.types import Receive, Scope, Send
+from cactuar.models import Receive, Scope, Send
 
 if TYPE_CHECKING:
     from cactuar.app import App
