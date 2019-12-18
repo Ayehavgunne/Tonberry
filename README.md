@@ -150,8 +150,9 @@ file for details
 * uvicorn
 
 ## TODO
+- WebSockets
 - JWT integration
 - Authentication
 - URL generation
 - Configuration
-- Static Files
+- Static File Router
