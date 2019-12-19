@@ -4,7 +4,8 @@ import urllib.parse
 from collections import namedtuple
 from dataclasses import is_dataclass
 from io import IOBase, TextIOBase
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
 
 import dacite
 
@@ -219,7 +220,11 @@ class MethodRouter(Router):
                     and not inspect.ismethod(value)
                     and not inspect.isfunction(value)
                 ):
-                    children.append(Branch(key, value, self.build_tree(value)))
+                    childs = self.build_tree(value)
+                    branch = Branch(key, value, childs)
+                    for child in childs:
+                        child.parent = branch
+                    children.append(branch)
                 elif inspect.ismethod(value) or inspect.isfunction(value):
                     mappings = {
                         self.method_registration.GET.get_map_by_func(
@@ -250,20 +255,19 @@ class MethodRouter(Router):
 
         return children
 
-    # def get_url(self, request: Request, func: Callable) -> str:
-    #     http_method = request.method
-    #     mapping = self.method_registration.get(http_method).get_map_by_func(
-    #         func.__name__
-    #     )
-    #     reversed_url = mapping.route
-    #     if reversed_url == self.DEFAULT_ROUTE:
-    #         reversed_url = ""
-    #     reversed_url = f"{self.get_route()}/{reversed_url}"
-    #     parent = list(self.route_parents.values())[0]
-    #     while True:
-    #         reversed_url = f"{parent.get_route()}/{reversed_url}"
-    #         if hasattr(parent, "route_parents"):
-    #             parent = list(parent.route_parents.values())[0]
-    #         else:
-    #             break
-    #     return f"/{reversed_url}"
+
+class StaticRouter(Router):
+    def __init__(self, app: "App", path_root: Union[str, Path]):
+        super().__init__(app)
+        if isinstance(path_root, str):
+            path_root = Path(path_root)
+        self.path_root = path_root.absolute().resolve()
+
+    async def handle_request(self, request: Request, response: Response) -> Response:
+        self._response = response
+        response.status = 200
+        response.body = await self._dispatch(request)
+        return response
+
+    async def _dispatch(self, request: Request) -> bytes:
+        pass

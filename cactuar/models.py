@@ -86,6 +86,7 @@ class Node:
     def __init__(self, route: str, class_instance: Type):
         self.route = route
         self.class_instance = class_instance
+        self.parent: Optional[Branch] = None
 
 
 class Branch(Node):
@@ -100,6 +101,16 @@ class Leaf(Node):
     def __init__(self, route: str, class_instance: Type, route_mapping: RouteMapping):
         super().__init__(route, class_instance)
         self.route_mapping = route_mapping
+
+    def get_url(self) -> str:
+        url = ""
+        if self.parent:
+            url = self.route
+            parent = self.parent
+            while parent is not None:
+                url = f"{parent.route}/{url}"
+                parent = parent.parent  # type: ignore
+        return f"/{url}"
 
 
 TreePart = Union[Branch, Leaf]

@@ -21,14 +21,12 @@ class App:
         self.sessions = SessionStore()
 
     async def __call__(self, scope: Dict, recieve: Receive, send: Send) -> None:
-        # noinspection PyUnusedLocal
-        handler: Handler
         if scope["type"] == "http":
             handler = HTTPHandler(self, scope)
         elif scope["type"] == "websocket":
-            handler = WebSocketHandler(self, scope)
+            handler = WebSocketHandler(self, scope)  # type: ignore
         elif scope["type"] == "lifespan":
-            handler = LifespanHandler(self, scope)
+            handler = LifespanHandler(self, scope)  # type: ignore
         else:
             raise RuntimeError(
                 f"{scope['type']} is either not a standard ASGI scope type or is not "
