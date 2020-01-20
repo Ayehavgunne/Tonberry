@@ -6,6 +6,8 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Dict, Union
 
+from cactuar.models import StrOrBytes
+
 
 class DataClassEncoder(json.JSONEncoder):
     def default(self, obj: Any) -> Dict[str, Any]:
@@ -14,7 +16,7 @@ class DataClassEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def decode_bytes_to_str(value: Union[str, bytes]) -> str:
+def decode_bytes_to_str(value: StrOrBytes) -> str:
     """
     Will convert any byte strings to UTF-8 strings
     """

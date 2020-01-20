@@ -82,9 +82,9 @@ class HTTPHandler(Handler):
                 "headers": response.headers.encode(),
             }
         )
-        await send(
-            {"type": "http.response.body", "body": response.body, "more_body": False}
-        )
+        async for data in response.body:
+            await send({"type": "http.response.body", "body": data, "more_body": True})
+        await send({"type": "http.response.body", "body": b"", "more_body": False})
 
 
 class WebSocketHandler(Handler):

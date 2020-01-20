@@ -1,5 +1,15 @@
 from dataclasses import dataclass, field
-from typing import Any, Awaitable, Callable, List, MutableMapping, Optional, Type, Union
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    List,
+    MutableMapping,
+    Optional,
+    Type,
+    Union,
+    Tuple,
+)
 
 
 @dataclass
@@ -113,6 +123,8 @@ class Leaf(Node):
         return f"/{url}"
 
 
+StrOrBytes = Union[str, bytes]
+HeaderList = List[Tuple[bytes, bytes]]
 TreePart = Union[Branch, Leaf]
 
 Scope = MutableMapping[str, Any]

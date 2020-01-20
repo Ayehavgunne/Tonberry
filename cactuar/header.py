@@ -1,10 +1,12 @@
 from datetime import datetime
 from http.cookies import SimpleCookie
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Union
+
+from cactuar.models import StrOrBytes, HeaderList
 
 
 class Header:
-    def __init__(self, header: List = None):
+    def __init__(self, header: HeaderList = None):
         if header is None:
             header = []
         self._header = header
@@ -27,7 +29,7 @@ class Header:
     def __delitem__(self, key: str) -> None:
         del self._header_attrs[key]
 
-    def encode(self) -> List[Tuple[bytes, bytes]]:
+    def encode(self) -> HeaderList:
         raw_header = []
         for header_key, attr in self._header_attrs.items():
             key = bytes(header_key, "utf-8")
@@ -46,8 +48,8 @@ class Header:
         self,
         key: str,
         morsel: str,
-        path: Union[str, bytes] = None,
-        domain: Union[str, bytes] = None,
+        path: StrOrBytes = None,
+        domain: StrOrBytes = None,
         secure: bool = False,
         expires: datetime = None,
         max_age: int = None,

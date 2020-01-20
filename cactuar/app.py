@@ -7,7 +7,7 @@ from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
 from cactuar.contexed.session import Session, SessionStore
 from cactuar.context_var_manager import set_context_var
-from cactuar.handlers import Handler, HTTPHandler, LifespanHandler, WebSocketHandler
+from cactuar.handlers import HTTPHandler, LifespanHandler, WebSocketHandler
 from cactuar.loggers import create_access_logger, create_app_logger
 from cactuar.models import Receive, Send
 from cactuar.routers import MethodRouter, Router

@@ -33,12 +33,12 @@ class Router:
             return json.dumps(result, cls=DataClassEncoder).encode("utf-8")
         if isinstance(result, TextIOBase):
             self.app.app_logger.warning(
-                "open().read() is a blocking operation! Use cactual.File() instead."
+                "open().read() is a blocking operation! Use cactuar.File() instead."
             )
             return result.read().encode("utf-8")
         if isinstance(result, IOBase):
             self.app.app_logger.warning(
-                "open().read() is a blocking operation! Use cactual.File() instead."
+                "open().read() is a blocking operation! Use cactuar.File() instead."
             )
             return b"".join(result.readlines())
         if isinstance(result, File):

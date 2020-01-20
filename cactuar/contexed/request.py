@@ -5,7 +5,7 @@ import user_agents
 from user_agents.parsers import UserAgent
 
 from cactuar.header import Header
-from cactuar.models import Receive, Scope, TreePart
+from cactuar.models import Receive, Scope, TreePart, StrOrBytes
 from cactuar.util import format_data
 
 
@@ -51,19 +51,19 @@ class Request:
         return self._body
 
     @property
-    def path(self) -> Union[str, bytes]:
+    def path(self) -> StrOrBytes:
         return self._uri.path
 
     @property
-    def scheme(self) -> Union[str, bytes]:
+    def scheme(self) -> StrOrBytes:
         return self._uri.scheme
 
     @property
-    def netloc(self) -> Union[str, bytes]:
+    def netloc(self) -> StrOrBytes:
         return self._uri.netloc
 
     @property
-    def params(self) -> Union[str, bytes]:
+    def params(self) -> StrOrBytes:
         return self._uri.params
 
     @property
@@ -75,19 +75,19 @@ class Request:
         return self._query_string
 
     @property
-    def fragment(self) -> Union[str, bytes]:
+    def fragment(self) -> StrOrBytes:
         return self._uri.fragment
 
     @property
-    def username(self) -> Optional[Union[str, bytes]]:
+    def username(self) -> Optional[StrOrBytes]:
         return self._uri.username
 
     @property
-    def password(self) -> Optional[Union[str, bytes]]:
+    def password(self) -> Optional[StrOrBytes]:
         return self._uri.password
 
     @property
-    def hostname(self) -> Optional[Union[str, bytes]]:
+    def hostname(self) -> Optional[StrOrBytes]:
         return self._uri.hostname
 
     @property
