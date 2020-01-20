@@ -155,4 +155,3 @@ file for details
 - Authentication
 - URL generation
 - Configuration
-- Startup and Shutdown tasks

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Callable
 from uuid import UUID, uuid4
 
 from cactuar import response as response_context
@@ -21,6 +21,8 @@ class App:
         self.access_logger = create_access_logger()
         self.app_logger = create_app_logger()
         self.sessions = SessionStore()
+        self.startup_functions: List[Callable] = []
+        self.shutdown_functions: List[Callable] = []
 
     async def __call__(self, scope: Dict, recieve: Receive, send: Send) -> None:
         if scope["type"] == "http":
@@ -42,11 +44,19 @@ class App:
     def add_static_route(self, path_root: Union[str, Path], route: str = "/") -> None:
         self.add_router(StaticRouter(self, path_root, route))
 
+    def on_startup(self, func: Callable) -> None:
+        self.startup_functions.append(func)
+
+    def on_shutdown(self, func: Callable) -> None:
+        self.shutdown_functions.append(func)
+
     def startup(self) -> None:
-        pass
+        for func in self.startup_functions:
+            func()
 
     def shutdown(self) -> None:
-        pass
+        for func in self.shutdown_functions:
+            func()
 
     async def handle_request(self, request: Request) -> Response:
         response = Response()
