@@ -1,4 +1,5 @@
-from typing import Dict
+from pathlib import Path
+from typing import Dict, List, Union
 from uuid import UUID, uuid4
 
 from cactuar import response as response_context
@@ -7,15 +8,16 @@ from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
 from cactuar.contexed.session import Session, SessionStore
 from cactuar.context_var_manager import set_context_var
+from cactuar.exceptions import HTTPError, RouteNotFoundError
 from cactuar.handlers import HTTPHandler, LifespanHandler, WebSocketHandler
 from cactuar.loggers import create_access_logger, create_app_logger
 from cactuar.models import Receive, Send
-from cactuar.routers import MethodRouter, Router
+from cactuar.routers import MethodRouter, Router, StaticRouter
 
 
 class App:
-    def __init__(self, router: Router = None):
-        self.router = router or MethodRouter(self)
+    def __init__(self, routers: List[Router] = None):
+        self.routers = routers or [MethodRouter(self)]
         self.access_logger = create_access_logger()
         self.app_logger = create_app_logger()
         self.sessions = SessionStore()
@@ -34,6 +36,12 @@ class App:
             )
         await handler(recieve, send)
 
+    def add_router(self, router: Router) -> None:
+        self.routers.append(router)
+
+    def add_static_route(self, path_root: Union[str, Path], route: str = "/") -> None:
+        self.add_router(StaticRouter(self, path_root, route))
+
     def startup(self) -> None:
         pass
 
@@ -43,7 +51,14 @@ class App:
     async def handle_request(self, request: Request) -> Response:
         response = Response()
         set_context_var(response_context, response)
-        response = await self.router.handle_request(request, response)
+        for router in self.routers:
+            try:
+                response = await router.handle_request(request, response)
+                break
+            except RouteNotFoundError:
+                pass
+        else:  # no break
+            raise HTTPError(404)
         self.access_logger.info()
         return response
 

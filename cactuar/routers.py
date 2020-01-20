@@ -12,7 +12,7 @@ import dacite
 from cactuar import content_types
 from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
-from cactuar.exceptions import FigureItOutLaterException, HTTPError
+from cactuar.exceptions import FigureItOutLaterException, RouteNotFoundError
 from cactuar.expose import _Expose
 from cactuar.models import Branch, Leaf, TreePart
 from cactuar.util import DataClassEncoder, File, format_data
@@ -77,7 +77,8 @@ class MethodRouter(Router):
     async def handle_request(self, request: Request, response: Response) -> Response:
         self._response = response
         response.status = 200
-        response.body = await self._dispatch(request)
+        # noinspection PyTypeHints
+        response.body = await self._dispatch(request)  # type: ignore
         return response
 
     async def _dispatch(self, request: Request) -> bytes:
@@ -166,7 +167,7 @@ class MethodRouter(Router):
             result = await func(*arg_types.positional, **arg_types.keyword)
             return await self.format_response_body(result)
 
-        raise HTTPError(404)
+        raise RouteNotFoundError
 
     def get_func(self, request: Request) -> Callable:
         http_method = request.method
@@ -182,7 +183,7 @@ class MethodRouter(Router):
         level = 0
         while isinstance(route, Branch):
             if len(paths) <= level:
-                raise HTTPError(404)
+                raise RouteNotFoundError
             route = self.match_route(paths[level], route.children, http_method)
             level += 1
         if route and isinstance(route, Leaf):
@@ -193,7 +194,7 @@ class MethodRouter(Router):
             else:
                 raise FigureItOutLaterException
         else:
-            raise HTTPError(404)
+            raise RouteNotFoundError
 
     @staticmethod
     def match_route(
@@ -206,7 +207,7 @@ class MethodRouter(Router):
                         return route
                 elif isinstance(route, Branch):
                     return route
-        raise HTTPError(404)
+        raise RouteNotFoundError
 
     def build_tree(self, cls: Type) -> List[TreePart]:
         children: List[TreePart] = []
@@ -257,17 +258,25 @@ class MethodRouter(Router):
 
 
 class StaticRouter(Router):
-    def __init__(self, app: "App", path_root: Union[str, Path]):
+    def __init__(self, app: "App", path_root: Union[str, Path], route: str = "/"):
         super().__init__(app)
+        self.route = f"/{route}"
         if isinstance(path_root, str):
             path_root = Path(path_root)
         self.path_root = path_root.absolute().resolve()
 
     async def handle_request(self, request: Request, response: Response) -> Response:
-        self._response = response
-        response.status = 200
-        response.body = await self._dispatch(request)
-        return response
+        if request.path.startswith(self.route):
+            self._response = response
+            response.status = 200
+            # noinspection PyTypeHints
+            response.body = await self._dispatch(request)  # type: ignore
+            return response
+        raise RouteNotFoundError
 
     async def _dispatch(self, request: Request) -> bytes:
-        pass
+        file = self.path_root / request.path.replace(f"{self.route}/", "", 1)
+        if file.is_file():
+            file_obj = File(file)
+            return await file_obj.read()
+        raise RouteNotFoundError

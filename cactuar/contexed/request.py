@@ -51,8 +51,11 @@ class Request:
         return self._body
 
     @property
-    def path(self) -> StrOrBytes:
-        return self._uri.path
+    def path(self) -> str:
+        if isinstance(self._uri.path, bytes):
+            return self._uri.path.decode("utf-8")
+        else:
+            return self._uri.path
 
     @property
     def scheme(self) -> StrOrBytes:

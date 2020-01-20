@@ -21,12 +21,12 @@ response: Response = ContextVarManager("response")  # type: ignore
 session: Session = ContextVarManager("session")  # type: ignore
 
 
-def create_app(router: "Router" = None) -> "App":
+def create_app(root: Type = None) -> "App":
     from cactuar.app import App
 
     app_instance = App()
-    if router is not None:
-        app_instance.router = router
+    if root is not None:
+        app_instance.routers[0].root = root()  # type: ignore
     return app_instance
 
 
@@ -35,6 +35,6 @@ def quick_start(root: Type, host: str = "localhost", port: int = 8080) -> None:
 
     quick_app = create_app()
     # noinspection PyTypeHints
-    quick_app.router.root = root()  # type: ignore
+    quick_app.routers[0].root = root()  # type: ignore
 
     uvicorn.run(quick_app, host=host, port=port, log_level="info", access_log=False)

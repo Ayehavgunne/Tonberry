@@ -35,13 +35,15 @@ class HTTPHandler(Handler):
         except HTTPError as err:
             response = Response()
             response.status = err.args[0]
-            response.body = str(err.args[0]).encode("utf-8")
+            # noinspection PyTypeHints
+            response.body = str(err.args[0]).encode("utf-8")  # type: ignore
             set_context_var(response_context, response)
             self.app.access_logger.error()
             await self.handle_exception(response, send)
         except Exception as err:
             response = Response()
-            response.body = traceback.format_exc().encode("utf-8")
+            # noinspection PyTypeHints
+            response.body = traceback.format_exc().encode("utf-8")  # type: ignore
             response.status = 500
             set_context_var(response_context, response)
             self.app.access_logger.error()
