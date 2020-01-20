@@ -155,5 +155,4 @@ file for details
 - Authentication
 - URL generation
 - Configuration
-- Static File Router
 - Startup and Shutdown tasks
