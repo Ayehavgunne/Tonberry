@@ -123,3 +123,16 @@ class _Expose:
             return wrapper(func, 3)
         else:
             return wrapper
+
+    @classmethod
+    def websocket(cls, route: Union[str, Callable] = None) -> Callable:
+        def wrapper(wrapped_func: Callable, frame_index: int = 2) -> Callable:
+            cls._register(wrapped_func, "WEBSOCKET", route, frame_index)
+            return wrapped_func
+
+        if callable(route):
+            func = route
+            route = None
+            return wrapper(func, 3)
+        else:
+            return wrapper

@@ -29,9 +29,12 @@ quick_start(Root)
 ### Features Example
 
 ```python
+import asyncio
 from dataclasses import dataclass
 
-from cactuar import quick_start, expose, File
+import uvicorn
+
+from cactuar import create_app, expose, File, websocket
 from cactuar.content_types import TextPlain, TextHTML, ApplicationJson
 
 
@@ -119,8 +122,27 @@ class Root:
         complete, success, result = await do_that_thing(data1, data2)
         return {"completed": complete, "outcome": success, "body": result}
 
+    @expose.websocket
+    async def ws(self):
+        """
+        Basic example of using a websocket. Sending and receiving are done through the
+        websocket object.
+        
+        URL: ws://127.0.0.1:8888/ws
+        """
+        data = await websocket.receive_text()
+        await websocket.send_text(f"echo {data}")
+        count = 0
+        while websocket.client_is_connected:
+            count += 1
+            await websocket.send_text(f"Hello {count}")
+            await asyncio.sleep(3)
 
-quick_start(Root, host="127.0.0.1", port=8888)
+
+app = create_app(root=Root)
+app.add_static_route(path_root="./static_files", route="static")
+# Using uvicorn here but any ASGI server will work just as well
+uvicorn.run(app, host="127.0.0.1", port=8888)
 ```
 
 ## Contributing
@@ -150,7 +172,6 @@ file for details
 * uvicorn
 
 ## TODO
-- WebSockets
 - JWT integration
 - Authentication
 - URL generation

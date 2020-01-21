@@ -2,13 +2,13 @@ import asyncio
 import traceback
 from typing import TYPE_CHECKING
 
-from cactuar import request as request_context
 from cactuar import response as response_context
 from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
 from cactuar.context_var_manager import set_context_var
 from cactuar.exceptions import HTTPError
 from cactuar.models import Receive, Scope, Send
+from cactuar.websocket import WebSocket
 
 if TYPE_CHECKING:
     from cactuar.app import App
@@ -29,7 +29,6 @@ class HTTPHandler(Handler):
 
     async def __call__(self, recieve: Receive, send: Send) -> None:
         request = Request(self.scope, recieve)
-        set_context_var(request_context, request)
         try:
             await self.handle_request(request, send)
         except HTTPError as err:
@@ -38,7 +37,7 @@ class HTTPHandler(Handler):
             # noinspection PyTypeHints
             response.body = str(err.args[0]).encode("utf-8")  # type: ignore
             set_context_var(response_context, response)
-            self.app.access_logger.error()
+            self.app.http_access_logger.error()
             await self.handle_exception(response, send)
         except Exception as err:
             response = Response()
@@ -46,7 +45,7 @@ class HTTPHandler(Handler):
             response.body = traceback.format_exc().encode("utf-8")  # type: ignore
             response.status = 500
             set_context_var(response_context, response)
-            self.app.access_logger.error()
+            self.app.http_access_logger.error()
             self.app.app_logger.exception(err)
             await self.handle_exception(response, send)
 
@@ -94,7 +93,10 @@ class WebSocketHandler(Handler):
         super().__init__(app, scope)
 
     async def __call__(self, recieve: Receive, send: Send) -> None:
-        pass
+        request = Request(self.scope, recieve)
+        request.method = "WEBSOCKET"
+        websocket = WebSocket(self.app, self.scope, recieve, send)
+        await self.app.handle_ws_request(websocket, request)
 
 
 class LifespanHandler(Handler):

@@ -1,3 +1,4 @@
 uvicorn
+websockets
 dacite
 user-agents

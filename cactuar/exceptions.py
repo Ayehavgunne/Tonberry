@@ -12,3 +12,11 @@ class RouteNotFoundError(CactuarException):
 
 class FigureItOutLaterException(CactuarException):
     pass
+
+
+class WebSocketError(CactuarException):
+    pass
+
+
+class WebSocketDisconnect(CactuarException):
+    pass

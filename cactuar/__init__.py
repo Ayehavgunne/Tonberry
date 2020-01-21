@@ -6,6 +6,7 @@ from cactuar.contexed.session import Session
 from cactuar.context_var_manager import ContextVarManager
 from cactuar.expose import _Expose
 from cactuar.util import File
+from cactuar.websocket import WebSocket
 
 if TYPE_CHECKING:
     from cactuar.app import App
@@ -19,6 +20,8 @@ request: Request = ContextVarManager("request")  # type: ignore
 response: Response = ContextVarManager("response")  # type: ignore
 # noinspection PyTypeChecker
 session: Session = ContextVarManager("session")  # type: ignore
+# noinspection PyTypeChecker
+websocket: WebSocket = ContextVarManager("websocket")  # type: ignore
 
 
 def create_app(root: Type = None) -> "App":

@@ -5,7 +5,17 @@ from collections import namedtuple
 from dataclasses import is_dataclass
 from io import IOBase, TextIOBase
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Type,
+    Union,
+    Tuple,
+)
 
 import dacite
 
@@ -49,11 +59,16 @@ class Router:
             return result
         raise NotImplementedError
 
+
+class DynamicRouter(Router):
     async def handle_request(self, request: Request, response: Response) -> Response:
         raise NotImplementedError
 
+    async def handle_ws_request(self, request: Request) -> Tuple[Callable, List[Any]]:
+        raise NotImplementedError
 
-class MethodRouter(Router):
+
+class MethodRouter(DynamicRouter):
     def __init__(self, app: "App"):
         super().__init__(app)
         # noinspection PyProtectedMember
@@ -80,6 +95,10 @@ class MethodRouter(Router):
         # noinspection PyTypeHints
         response.body = await self._dispatch(request)  # type: ignore
         return response
+
+    async def handle_ws_request(self, request: Request) -> Tuple[Callable, List[Any]]:
+        func = self.get_func(request)
+        return func, self.get_args(request)
 
     async def _dispatch(self, request: Request) -> bytes:
         func = self.get_func(request)
@@ -171,10 +190,7 @@ class MethodRouter(Router):
 
     def get_func(self, request: Request) -> Callable:
         http_method = request.method
-        if isinstance(request.path, bytes):
-            url_path = request.path.decode("utf-8")
-        else:
-            url_path = request.path
+        url_path = request.path
         paths = [urllib.parse.unquote(pth) for pth in url_path.split("/") if pth != ""]
         paths.append("index")
         if self._tree is None:
@@ -227,29 +243,9 @@ class MethodRouter(Router):
                         child.parent = branch
                     children.append(branch)
                 elif inspect.ismethod(value) or inspect.isfunction(value):
-                    mappings = {
-                        self.method_registration.GET.get_map_by_func(
-                            value.__name__, cls.__class__.__name__
-                        ),
-                        self.method_registration.POST.get_map_by_func(
-                            value.__name__, cls.__class__.__name__
-                        ),
-                        self.method_registration.PUT.get_map_by_func(
-                            value.__name__, cls.__class__.__name__
-                        ),
-                        self.method_registration.PATCH.get_map_by_func(
-                            value.__name__, cls.__class__.__name__
-                        ),
-                        self.method_registration.DELETE.get_map_by_func(
-                            value.__name__, cls.__class__.__name__
-                        ),
-                        self.method_registration.HEAD.get_map_by_func(
-                            value.__name__, cls.__class__.__name__
-                        ),
-                        self.method_registration.OPTIONS.get_map_by_func(
-                            value.__name__, cls.__class__.__name__
-                        ),
-                    }
+                    mappings = self.method_registration.get_all_maps_by_func(
+                        value.__name__, cls.__class__.__name__
+                    )
                     mappings = {mapping for mapping in mappings if mapping}
                     for mapping in mappings:
                         children.append(Leaf(mapping.route, cls, mapping))

@@ -9,6 +9,7 @@ from typing import (
     Type,
     Union,
     Tuple,
+    Set,
 )
 
 
@@ -75,6 +76,7 @@ class Methods:
     PATCH: RouteMappings
     HEAD: RouteMappings
     OPTIONS: RouteMappings
+    WEBSOCKET: RouteMappings
 
     def __init__(self) -> None:
         self.GET = RouteMappings(http_method="GET")
@@ -84,12 +86,41 @@ class Methods:
         self.PATCH = RouteMappings(http_method="PATCH")
         self.HEAD = RouteMappings(http_method="HEAD")
         self.OPTIONS = RouteMappings(http_method="OPTIONS")
+        self.WEBSOCKET = RouteMappings(http_method="WEBSOCKET")
 
     def get(self, http_method: str) -> RouteMappings:
         if hasattr(self, http_method):
             return getattr(self, http_method)
         else:
             raise TypeError(f"{http_method} is not a supported HTTP Method")
+
+    def get_all_maps_by_func(
+        self, func_name: str, parent_name: str = None
+    ) -> Set[RouteMapping]:
+        return {
+            self.GET.get_map_by_func(func_name, parent_name),
+            self.POST.get_map_by_func(func_name, parent_name),
+            self.PUT.get_map_by_func(func_name, parent_name),
+            self.PATCH.get_map_by_func(func_name, parent_name),
+            self.DELETE.get_map_by_func(func_name, parent_name),
+            self.HEAD.get_map_by_func(func_name, parent_name),
+            self.OPTIONS.get_map_by_func(func_name, parent_name),
+            self.WEBSOCKET.get_map_by_func(func_name, parent_name),
+        }
+
+    def get_all_maps_by_route(
+        self, route: str, parent_name: str = None
+    ) -> Set[RouteMapping]:
+        return {
+            self.GET.get_map_by_route(route, parent_name),
+            self.POST.get_map_by_route(route, parent_name),
+            self.PUT.get_map_by_route(route, parent_name),
+            self.PATCH.get_map_by_route(route, parent_name),
+            self.DELETE.get_map_by_route(route, parent_name),
+            self.HEAD.get_map_by_route(route, parent_name),
+            self.OPTIONS.get_map_by_route(route, parent_name),
+            self.WEBSOCKET.get_map_by_route(route, parent_name),
+        }
 
 
 class Node:

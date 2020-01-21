@@ -1,24 +1,39 @@
 from pathlib import Path
-from typing import Dict, List, Union, Callable
+from typing import Dict, List, Union, Callable, Generator
 from uuid import UUID, uuid4
 
+from websockets import ConnectionClosedOK, ConnectionClosedError
+
+from cactuar import request as request_context
 from cactuar import response as response_context
 from cactuar import session as session_context
+from cactuar import websocket as websocket_context
 from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
 from cactuar.contexed.session import Session, SessionStore
 from cactuar.context_var_manager import set_context_var
-from cactuar.exceptions import HTTPError, RouteNotFoundError
+from cactuar.exceptions import (
+    HTTPError,
+    RouteNotFoundError,
+    WebSocketError,
+    WebSocketDisconnect,
+)
 from cactuar.handlers import HTTPHandler, LifespanHandler, WebSocketHandler
-from cactuar.loggers import create_access_logger, create_app_logger
+from cactuar.loggers import (
+    create_http_access_logger,
+    create_app_logger,
+    create_websocket_access_logger,
+)
 from cactuar.models import Receive, Send
-from cactuar.routers import MethodRouter, Router, StaticRouter
+from cactuar.routers import MethodRouter, Router, StaticRouter, DynamicRouter
+from cactuar.websocket import WebSocket
 
 
 class App:
     def __init__(self, routers: List[Router] = None):
         self.routers = routers or [MethodRouter(self)]
-        self.access_logger = create_access_logger()
+        self.http_access_logger = create_http_access_logger()
+        self.websocket_access_logger = create_websocket_access_logger()
         self.app_logger = create_app_logger()
         self.sessions = SessionStore()
         self.startup_functions: List[Callable] = []
@@ -37,6 +52,14 @@ class App:
                 f"yet implimented"
             )
         await handler(recieve, send)
+
+    @property
+    def static_routes(self) -> Generator[StaticRouter, None, None]:
+        return (router for router in self.routers if isinstance(router, StaticRouter))
+
+    @property
+    def dynamic_routes(self) -> Generator[DynamicRouter, None, None]:
+        return (router for router in self.routers if isinstance(router, DynamicRouter))
 
     def add_router(self, router: Router) -> None:
         self.routers.append(router)
@@ -59,18 +82,46 @@ class App:
             func()
 
     async def handle_request(self, request: Request) -> Response:
+        set_context_var(request_context, request)
         response = Response()
         set_context_var(response_context, response)
-        for router in self.routers:
+        for s_router in self.static_routes:
             try:
-                response = await router.handle_request(request, response)
+                response = await s_router.handle_request(request, response)
                 break
             except RouteNotFoundError:
                 pass
         else:  # no break
-            raise HTTPError(404)
-        self.access_logger.info()
+            for d_router in self.dynamic_routes:
+                try:
+                    response = await d_router.handle_request(request, response)
+                    break
+                except RouteNotFoundError:
+                    pass
+            else:  # no break
+                raise HTTPError(404)
+        self.http_access_logger.info()
         return response
+
+    async def handle_ws_request(self, websocket: WebSocket, request: Request) -> None:
+        set_context_var(request_context, request)
+        set_context_var(websocket_context, websocket)
+        for router in self.dynamic_routes:
+            try:
+                func, args = await router.handle_ws_request(request)
+                await websocket.accept()
+                self.websocket_access_logger.info("Opened")
+                try:
+                    await func(*args)
+                except (WebSocketDisconnect, ConnectionClosedOK):
+                    self.websocket_access_logger.info("Disconnected")
+                except ConnectionClosedError:
+                    self.websocket_access_logger.error("Disconnected unexpectedly")
+                break
+            except RouteNotFoundError:
+                pass
+        else:  # no break
+            raise WebSocketError
 
     def get_session_id(self, request: Request) -> UUID:
         sesson_cookie = request.headers.get_cookie("CTSESSIONID")
