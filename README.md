@@ -1,7 +1,7 @@
 # Cactuar
 
 An ASGI compliant web microframework that takes a class based approach to routing.
-Heavily influenced by CherryPy but made compatible with asyncio.
+Influenced by [CherryPy](https://cherrypy.org/) but made compatible with asyncio.
 
 ### Installing
 
@@ -139,10 +139,11 @@ class Root:
             await asyncio.sleep(3)
 
 
-app = create_app(root=Root)
-app.add_static_route(path_root="./static_files", route="static")
-# Using uvicorn here but any ASGI server will work just as well
-uvicorn.run(app, host="127.0.0.1", port=8888)
+if __name__ == "__main__":
+    app = create_app(root=Root)
+    app.add_static_route(path_root="./static_files", route="static")
+    # Using uvicorn here but any ASGI server will work just as well
+    uvicorn.run(app, host="127.0.0.1", port=8888)
 ```
 
 ## Contributing
@@ -155,7 +156,7 @@ the process for submitting pull requests.
 [SemVer](http://semver.org/) is used for versioning. For the versions available, see the 
 [tags on this repository](https://github.com/Ayehavgunne/Cactuar/tags). 
 
-## Author
+## Authors
 
 * **Anthony Post** - [Ayehavgunne](https://github.com/Ayehavgunne)
 
@@ -176,3 +177,5 @@ file for details
 - Authentication
 - URL generation
 - Configuration
+- Tests
+- Documentation
