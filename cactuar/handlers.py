@@ -6,7 +6,7 @@ from cactuar import response as response_context
 from cactuar.contexed.request import Request
 from cactuar.contexed.response import Response
 from cactuar.context_var_manager import set_context_var
-from cactuar.exceptions import HTTPError
+from cactuar.exceptions import HTTPError, HTTPRedirect
 from cactuar.models import Receive, Scope, Send
 from cactuar.websocket import WebSocket
 
@@ -38,6 +38,13 @@ class HTTPHandler(Handler):
             response.body = str(err.args[0]).encode("utf-8")  # type: ignore
             set_context_var(response_context, response)
             self.app.http_access_logger.error()
+            await self.handle_exception(response, send)
+        except HTTPRedirect as err:
+            response = Response()
+            response.status = err.code
+            response.headers["Location"] = err.route
+            set_context_var(response_context, response)
+            self.app.http_access_logger.info()
             await self.handle_exception(response, send)
         except Exception as err:
             response = Response()

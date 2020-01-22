@@ -2,6 +2,12 @@ class CactuarException(Exception):
     pass
 
 
+class HTTPRedirect(CactuarException):
+    def __init__(self, route: str, code: int = 307):
+        self.route = route
+        self.code = code
+
+
 class HTTPError(CactuarException):
     pass
 
