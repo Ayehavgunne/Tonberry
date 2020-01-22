@@ -12,9 +12,9 @@ from typing import (
     Dict,
     List,
     Optional,
+    Tuple,
     Type,
     Union,
-    Tuple,
 )
 
 import dacite

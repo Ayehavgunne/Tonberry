@@ -5,7 +5,7 @@ import user_agents
 from user_agents.parsers import UserAgent
 
 from cactuar.header import Header
-from cactuar.models import Receive, Scope, TreePart, StrOrBytes
+from cactuar.models import Receive, Scope, StrOrBytes, TreePart
 from cactuar.util import format_data
 
 

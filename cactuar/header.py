@@ -2,7 +2,7 @@ from datetime import datetime
 from http.cookies import SimpleCookie
 from typing import Dict, Optional, Union
 
-from cactuar.models import StrOrBytes, HeaderList
+from cactuar.models import HeaderList, StrOrBytes
 
 
 class Header:

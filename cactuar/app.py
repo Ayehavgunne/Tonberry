@@ -1,8 +1,8 @@
 from pathlib import Path
-from typing import Dict, List, Union, Callable, Generator
+from typing import Callable, Dict, Generator, List, Union
 from uuid import UUID, uuid4
 
-from websockets import ConnectionClosedOK, ConnectionClosedError
+from websockets import ConnectionClosedError, ConnectionClosedOK
 
 from cactuar import request as request_context
 from cactuar import response as response_context
@@ -15,17 +15,17 @@ from cactuar.context_var_manager import set_context_var
 from cactuar.exceptions import (
     HTTPError,
     RouteNotFoundError,
-    WebSocketError,
     WebSocketDisconnect,
+    WebSocketError,
 )
 from cactuar.handlers import HTTPHandler, LifespanHandler, WebSocketHandler
 from cactuar.loggers import (
-    create_http_access_logger,
     create_app_logger,
+    create_http_access_logger,
     create_websocket_access_logger,
 )
 from cactuar.models import Receive, Send
-from cactuar.routers import MethodRouter, Router, StaticRouter, DynamicRouter
+from cactuar.routers import DynamicRouter, MethodRouter, Router, StaticRouter
 from cactuar.websocket import WebSocket
 
 

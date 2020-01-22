@@ -6,10 +6,10 @@ from typing import (
     List,
     MutableMapping,
     Optional,
+    Set,
+    Tuple,
     Type,
     Union,
-    Tuple,
-    Set,
 )
 
 

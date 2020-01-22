@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 from cactuar.exceptions import WebSocketDisconnect
 from cactuar.header import Header
-from cactuar.models import Scope, Receive, Send, Message
+from cactuar.models import Message, Receive, Scope, Send
 
 if TYPE_CHECKING:
     from cactuar import App
