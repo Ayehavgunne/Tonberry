@@ -3,9 +3,9 @@ import traceback
 from typing import TYPE_CHECKING
 
 from cactuar import response as response_context
-from cactuar.contexed.request import Request
-from cactuar.contexed.response import Response
 from cactuar.context_var_manager import set_context_var
+from cactuar.contexted.request import Request
+from cactuar.contexted.response import Response
 from cactuar.exceptions import HTTPError, HTTPRedirect
 from cactuar.models import Receive, Scope, Send
 from cactuar.websocket import WebSocket

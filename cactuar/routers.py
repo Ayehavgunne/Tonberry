@@ -1,5 +1,6 @@
 import inspect
 import json
+import mimetypes
 import urllib.parse
 from collections import namedtuple
 from dataclasses import is_dataclass
@@ -20,8 +21,8 @@ from typing import (
 import dacite
 
 from cactuar import content_types
-from cactuar.contexed.request import Request
-from cactuar.contexed.response import Response
+from cactuar.contexted.request import Request
+from cactuar.contexted.response import Response
 from cactuar.exceptions import FigureItOutLaterException, RouteNotFoundError
 from cactuar.expose import _Expose
 from cactuar.models import Branch, Leaf, TreePart
@@ -254,9 +255,9 @@ class MethodRouter(DynamicRouter):
 
 
 class StaticRouter(Router):
-    def __init__(self, app: "App", path_root: Union[str, Path], route: str = "/"):
+    def __init__(self, app: "App", path_root: Union[str, Path], route: str = ""):
         super().__init__(app)
-        self.route = f"/{route}"
+        self.route = route
         if isinstance(path_root, str):
             path_root = Path(path_root)
         self.path_root = path_root.absolute().resolve()
@@ -271,8 +272,15 @@ class StaticRouter(Router):
         raise RouteNotFoundError
 
     async def _dispatch(self, request: Request) -> bytes:
-        file = self.path_root / request.path.replace(f"{self.route}/", "", 1)
+        file = (
+            self.path_root / request.path.replace(f"{self.route}/", "", 1)
+        ).resolve()
         if file.is_file():
+            mime_type, encoding = mimetypes.guess_type(file.as_posix())
+            if mime_type:
+                self._response.content_type = mime_type
+            if encoding:
+                self._response.headers["Content-Encoding"] = encoding
             file_obj = File(file)
             return await file_obj.read()
         raise RouteNotFoundError

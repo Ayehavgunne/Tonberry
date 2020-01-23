@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING, Type
 
-from cactuar.contexed.request import Request
-from cactuar.contexed.response import Response
-from cactuar.contexed.session import Session
 from cactuar.context_var_manager import ContextVarManager
+from cactuar.contexted.request import Request
+from cactuar.contexted.response import Response
+from cactuar.contexted.session import Session
 from cactuar.expose import _Expose
 from cactuar.util import File
 from cactuar.websocket import WebSocket

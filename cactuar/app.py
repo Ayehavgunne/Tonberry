@@ -8,10 +8,10 @@ from cactuar import request as request_context
 from cactuar import response as response_context
 from cactuar import session as session_context
 from cactuar import websocket as websocket_context
-from cactuar.contexed.request import Request
-from cactuar.contexed.response import Response
-from cactuar.contexed.session import Session, SessionStore
 from cactuar.context_var_manager import set_context_var
+from cactuar.contexted.request import Request
+from cactuar.contexted.response import Response
+from cactuar.contexted.session import Session, SessionStore
 from cactuar.exceptions import (
     HTTPError,
     RouteNotFoundError,
