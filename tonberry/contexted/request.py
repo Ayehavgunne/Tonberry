@@ -4,9 +4,9 @@ from urllib.parse import ParseResult, ParseResultBytes, parse_qs, urlparse
 import user_agents
 from user_agents.parsers import UserAgent
 
-from cactuar.header import Header
-from cactuar.models import Receive, Scope, StrOrBytes, TreePart
-from cactuar.util import format_data
+from tonberry.header import Header
+from tonberry.models import Receive, Scope, StrOrBytes, TreePart
+from tonberry.util import format_data
 
 
 class Request:

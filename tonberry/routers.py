@@ -20,16 +20,16 @@ from typing import (
 
 import dacite
 
-from cactuar import content_types
-from cactuar.contexted.request import Request
-from cactuar.contexted.response import Response
-from cactuar.exceptions import FigureItOutLaterException, RouteNotFoundError
-from cactuar.expose import _Expose
-from cactuar.models import Branch, Leaf, TreePart
-from cactuar.util import DataClassEncoder, File, format_data
+from tonberry import content_types
+from tonberry.contexted.request import Request
+from tonberry.contexted.response import Response
+from tonberry.exceptions import FigureItOutLaterException, RouteNotFoundError
+from tonberry.expose import _Expose
+from tonberry.models import Branch, Leaf, TreePart
+from tonberry.util import DataClassEncoder, File, format_data
 
 if TYPE_CHECKING:
-    from cactuar.app import App
+    from tonberry.app import App
 
 
 class Router:
@@ -44,12 +44,12 @@ class Router:
             return json.dumps(result, cls=DataClassEncoder).encode("utf-8")
         if isinstance(result, TextIOBase):
             self.app.app_logger.warning(
-                "open().read() is a blocking operation! Use cactuar.File() instead."
+                "open().read() is a blocking operation! Use tonberry.File() instead."
             )
             return result.read().encode("utf-8")
         if isinstance(result, IOBase):
             self.app.app_logger.warning(
-                "open().read() is a blocking operation! Use cactuar.File() instead."
+                "open().read() is a blocking operation! Use tonberry.File() instead."
             )
             return b"".join(result.readlines())
         if isinstance(result, File):

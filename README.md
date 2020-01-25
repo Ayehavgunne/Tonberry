@@ -1,4 +1,4 @@
-# Cactuar
+# Tonberry
 
 An ASGI compliant web microframework that takes a class based approach to routing.
 Influenced by [CherryPy](https://cherrypy.org/) but made compatible with asyncio.
@@ -6,7 +6,7 @@ Influenced by [CherryPy](https://cherrypy.org/) but made compatible with asyncio
 ### Installing
 
 ```bash
-pip install cactuar
+pip install tonberry
 ```
 
 ## Getting Started
@@ -14,7 +14,7 @@ pip install cactuar
 ### 2 Minute App Example
 
 ```python
-from cactuar import quick_start, expose
+from tonberry import quick_start, expose
 
 class Root:
     @expose.get
@@ -34,8 +34,8 @@ from dataclasses import dataclass
 
 import uvicorn
 
-from cactuar import create_app, expose, File, websocket
-from cactuar.content_types import TextPlain, TextHTML, ApplicationJson
+from tonberry import create_app, expose, File, websocket
+from tonberry.content_types import TextPlain, TextHTML, ApplicationJson
 
 
 @dataclass
@@ -103,7 +103,7 @@ class Root:
         of the method.
 
         To indicate what the content-type header you want to set then use a type
-        hints for the return value from cactuar.content_types. This feature may
+        hints for the return value from tonberry.content_types. This feature may
         or may not stay as part of the project. It will not overwrite any
         content type set manually inside the method.
 
@@ -157,7 +157,7 @@ the process for submitting pull requests.
 ## Versioning
 
 [SemVer](http://semver.org/) is used for versioning. For the versions available, see the 
-[tags on this repository](https://github.com/Ayehavgunne/Cactuar/tags). 
+[tags on this repository](https://github.com/Ayehavgunne/Tonberry/tags).
 
 ## Authors
 

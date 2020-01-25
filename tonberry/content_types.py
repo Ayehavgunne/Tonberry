@@ -1,6 +1,6 @@
 from typing import IO, TypeVar
 
-from cactuar import File
+from tonberry import File
 
 TextHTML = TypeVar("TextHTML", str, bytes, IO, File)
 TextPlain = TypeVar("TextPlain", str, bytes, IO, File)

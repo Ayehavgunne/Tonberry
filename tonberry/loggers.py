@@ -1,9 +1,9 @@
 from logging import INFO, Formatter, Logger, LogRecord, StreamHandler
 
-from cactuar import request, response
+from tonberry import request, response
 
 
-class CactuarLogger(Logger):
+class TonberryLogger(Logger):
     def __init__(self, name: str, level: int):
         super().__init__(name, level)
 
@@ -14,7 +14,7 @@ class CactuarLogger(Logger):
         super().error(msg, *args, **kwargs)
 
 
-class CactuarHTTPLogger(CactuarLogger):
+class TonberryHTTPLogger(TonberryLogger):
     # noinspection PyTypeHints
     def makeRecord(  # type: ignore
         self,
@@ -41,7 +41,7 @@ class CactuarHTTPLogger(CactuarLogger):
         return record
 
 
-class CactuarWebsocketLogger(CactuarLogger):
+class TonberryWebsocketLogger(TonberryLogger):
     # noinspection PyTypeHints
     def makeRecord(  # type: ignore
         self,
@@ -65,8 +65,8 @@ class CactuarWebsocketLogger(CactuarLogger):
         return record
 
 
-def create_http_access_logger() -> CactuarHTTPLogger:
-    logger = CactuarHTTPLogger("ct_access", INFO)
+def create_http_access_logger() -> TonberryHTTPLogger:
+    logger = TonberryHTTPLogger("ct_access", INFO)
     handler = StreamHandler()
     formatter = Formatter(
         "{asctime} {levelname} {client_ip}:{client_port} {http_method} "
@@ -78,8 +78,8 @@ def create_http_access_logger() -> CactuarHTTPLogger:
     return logger
 
 
-def create_websocket_access_logger() -> CactuarWebsocketLogger:
-    logger = CactuarWebsocketLogger("ct_access", INFO)
+def create_websocket_access_logger() -> TonberryWebsocketLogger:
+    logger = TonberryWebsocketLogger("ct_access", INFO)
     handler = StreamHandler()
     formatter = Formatter(
         "{asctime} {levelname} {client_ip}:{client_port} WebSocket {path} {message}",
@@ -90,8 +90,8 @@ def create_websocket_access_logger() -> CactuarWebsocketLogger:
     return logger
 
 
-def create_app_logger() -> CactuarLogger:
-    logger = CactuarLogger("ct_app", INFO)
+def create_app_logger() -> TonberryLogger:
+    logger = TonberryLogger("ct_app", INFO)
     handler = StreamHandler()
     formatter = Formatter("{asctime} {levelname} {message}", style="{")
     handler.setFormatter(formatter)

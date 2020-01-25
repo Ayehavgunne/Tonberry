@@ -6,7 +6,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Dict, Union
 
-from cactuar.models import StrOrBytes
+from tonberry.models import StrOrBytes
 
 
 class DataClassEncoder(json.JSONEncoder):
