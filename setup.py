@@ -1,13 +1,16 @@
 from setuptools import setup, find_packages
 
-from tonberry import __version__
+from tonberry.__version__ import VERSION
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open("requirements.txt", "r") as fh:
+    requirements = fh.readlines()
+
 setup(
     name="Tonberry",
-    version=__version__,
+    version=VERSION,
     description="ASGI compliant web microframework",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -16,7 +19,7 @@ setup(
     license="MIT License",
     url="https://github.com/Ayehavgunne/Tonberry/",
     packages=find_packages(),
-    install_requires=["dacite", "user-agents"],
+    install_requires=requirements,
     extras_require={"dev": ["mypy", "black", "isort"]},
     python_requires=">=3.7",
 )
