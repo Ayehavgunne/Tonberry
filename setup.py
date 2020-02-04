@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from tonberry.__version__ import VERSION
+from __version__ import VERSION
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
