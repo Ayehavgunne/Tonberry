@@ -64,7 +64,7 @@ class App:
     def add_router(self, router: Router) -> None:
         self.routers.append(router)
 
-    def add_static_route(self, path_root: Union[str, Path], route: str = "/") -> None:
+    def add_static_route(self, path_root: Union[str, Path], route: str = "") -> None:
         self.add_router(StaticRouter(self, path_root, route))
 
     def on_startup(self, func: Callable) -> None:
@@ -124,7 +124,7 @@ class App:
             raise WebSocketError
 
     def get_session_id(self, request: Request) -> UUID:
-        sesson_cookie = request.headers.get_cookie("CTSESSIONID")
+        sesson_cookie = request.headers.get_cookie("TBSESSIONID")
         if sesson_cookie is not None:
             session_id = UUID(str(sesson_cookie))
             session = self.sessions[session_id]

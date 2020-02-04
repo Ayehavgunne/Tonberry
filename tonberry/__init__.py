@@ -1,3 +1,5 @@
+__version__ = "0.0.3"
+
 from typing import TYPE_CHECKING, Type
 
 from tonberry.context_var_manager import ContextVarManager

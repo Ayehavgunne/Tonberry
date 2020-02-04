@@ -59,9 +59,9 @@ class HTTPHandler(Handler):
     async def handle_request(self, request: Request, send: Send) -> None:
         session_id = self.app.get_session_id(request)
         response: Response = await self.app.handle_request(request)
-        if request.headers.get_cookie("CTSESSIONID") is None:
+        if request.headers.get_cookie("TBSESSIONID") is None:
             response.headers.set_cookie(
-                "CTSESSIONID",
+                "TBSESSIONID",
                 str(session_id),
                 path=request.path,
                 domain=request.hostname,
@@ -111,22 +111,20 @@ class LifespanHandler(Handler):
         super().__init__(app, scope)
 
     async def __call__(self, recieve: Receive, send: Send) -> None:
-        while True:
-            event = await recieve()
-            if event["type"] == "lifespan.startup":
-                try:
-                    self.app.startup()
-                except Exception as err:
-                    await send({"type": "lifespan.startup.failed", "message": str(err)})
-                else:
-                    await send({"type": "lifespan.startup.complete"})
-            elif event["type"] == "lifespan.shutdown":
-                try:
-                    self.app.shutdown()
-                except Exception as err:
-                    await send(
-                        {"type": "lifespan.shutdown.failed", "message": str(err)}
-                    )
-                else:
-                    await send({"type": "lifespan.shutdown.complete"})
-                break
+        message = await recieve()
+        if message["type"] == "lifespan.startup":
+            try:
+                self.app.startup()
+            except Exception as err:
+                await send({"type": "lifespan.startup.failed", "message": str(err)})
+            else:
+                await send({"type": "lifespan.startup.complete"})
+        elif message["type"] == "lifespan.shutdown":
+            try:
+                self.app.shutdown()
+            except Exception as err:
+                await send(
+                    {"type": "lifespan.shutdown.failed", "message": str(err)}
+                )
+            else:
+                await send({"type": "lifespan.shutdown.complete"})
