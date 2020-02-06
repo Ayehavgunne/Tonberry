@@ -24,8 +24,7 @@ class Request:
         self.headers = Header(scope.get("headers"))
         self.current_route: Optional[TreePart] = None
         self._unsearched_path: str = ""
-        user_agent = self.headers["user-agent"]
-        self.user_agent: UserAgent = user_agents.parse(user_agent or "unknown")
+        self._user_agent: str = ""
         self._scope = scope
 
     async def stream(self) -> AsyncGenerator[bytes, None]:
@@ -97,3 +96,11 @@ class Request:
     @property
     def port(self) -> Optional[int]:
         return self._uri.port
+
+    @property
+    def user_agent(self) -> UserAgent:
+        if not self._user_agent:
+            self._user_agent = user_agents.parse(
+                self.headers["user-agent"] or "unknown"
+            )
+        return self._user_agent

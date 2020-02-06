@@ -123,8 +123,6 @@ class LifespanHandler(Handler):
             try:
                 self.app.shutdown()
             except Exception as err:
-                await send(
-                    {"type": "lifespan.shutdown.failed", "message": str(err)}
-                )
+                await send({"type": "lifespan.shutdown.failed", "message": str(err)})
             else:
                 await send({"type": "lifespan.shutdown.complete"})

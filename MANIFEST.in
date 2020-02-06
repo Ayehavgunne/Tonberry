@@ -1,3 +1,3 @@
 recursive-include tonberry *.py
-include __version__.py
+include tonberry/__version__.py
 include requirements.txt
