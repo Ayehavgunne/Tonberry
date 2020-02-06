@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable, Dict, Generator, List, Union
+from typing import Callable, Generator, List, Union
 from uuid import UUID, uuid4
 
 from websockets import ConnectionClosedError, ConnectionClosedOK
@@ -24,7 +24,7 @@ from tonberry.loggers import (
     create_http_access_logger,
     create_websocket_access_logger,
 )
-from tonberry.models import Receive, Send
+from tonberry.models import Receive, Scope, Send
 from tonberry.routers import DynamicRouter, MethodRouter, Router, StaticRouter
 from tonberry.websocket import WebSocket
 
@@ -39,7 +39,7 @@ class App:
         self.startup_functions: List[Callable] = []
         self.shutdown_functions: List[Callable] = []
 
-    async def __call__(self, scope: Dict, recieve: Receive, send: Send) -> None:
+    async def __call__(self, scope: Scope, recieve: Receive, send: Send) -> None:
         if scope["type"] == "http":
             handler = HTTPHandler(self, scope)
         elif scope["type"] == "websocket":
