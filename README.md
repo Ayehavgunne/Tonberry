@@ -2,7 +2,7 @@
 
 An ASGI compliant web microframework that takes a class based approach to
 routing. Influenced by [CherryPy](https://cherrypy.org/) but made compatible
-with asyncio. A companion ASGI server named Qactuar was spawned from this
+with asyncio. A companion ASGI server named **Qactuar** was spawned from this
 project. Check it out [here](https://github.com/Ayehavgunne/Qactuar)!
 
 ### Installing
