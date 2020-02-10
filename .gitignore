@@ -605,6 +605,4 @@ DerivedData/
 !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 
-test.py
-test.html
 /.pytype/

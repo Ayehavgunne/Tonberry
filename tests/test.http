@@ -1,0 +1,9 @@
+POST http://localhost:8000/what
+Content-Type: application/json
+
+{
+    "thing": "stuff",
+    "num": {{$randomInt}}
+}
+
+###

@@ -1,12 +1,14 @@
 # Tonberry
 
-An ASGI compliant web microframework that takes a class based approach to routing.
-Influenced by [CherryPy](https://cherrypy.org/) but made compatible with asyncio.
+An ASGI compliant web microframework that takes a class based approach to
+routing. Influenced by [CherryPy](https://cherrypy.org/) but made compatible
+with asyncio. A companion ASGI server named Qactuar was spawned from this
+project. Check it out [here](https://github.com/Ayehavgunne/Qactuar)!
 
 ### Installing
 
 ```bash
-pip install tonberry
+$ pip install tonberry
 ```
 
 ## Getting Started
@@ -151,13 +153,13 @@ if __name__ == "__main__":
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and 
-the process for submitting pull requests.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of
+conduct, and the process for submitting pull requests.
 
 ## Versioning
 
-[SemVer](http://semver.org/) is used for versioning. For the versions available, see the 
-[tags on this repository](https://github.com/Ayehavgunne/Tonberry/tags).
+[SemVer](http://semver.org/) is used for versioning. For the versions available,
+see the [tags on this repository](https://github.com/Ayehavgunne/Tonberry/tags).
 
 ## Authors
 
@@ -165,8 +167,8 @@ the process for submitting pull requests.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) 
-file for details
+This project is licensed under the MIT License - see the
+[LICENSE.txt](LICENSE.txt) file for details
 
 ## Acknowledgments
 

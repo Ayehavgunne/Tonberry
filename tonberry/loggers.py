@@ -66,7 +66,7 @@ class TonberryWebsocketLogger(TonberryLogger):
 
 
 def create_http_access_logger() -> TonberryHTTPLogger:
-    logger = TonberryHTTPLogger("ct_access", INFO)
+    logger = TonberryHTTPLogger("tb_http_access", INFO)
     handler = StreamHandler()
     formatter = Formatter(
         "{asctime} {levelname} {client_ip}:{client_port} {http_method} "
@@ -79,7 +79,7 @@ def create_http_access_logger() -> TonberryHTTPLogger:
 
 
 def create_websocket_access_logger() -> TonberryWebsocketLogger:
-    logger = TonberryWebsocketLogger("ct_access", INFO)
+    logger = TonberryWebsocketLogger("tb_ws_access", INFO)
     handler = StreamHandler()
     formatter = Formatter(
         "{asctime} {levelname} {client_ip}:{client_port} WebSocket {path} {message}",
@@ -91,7 +91,7 @@ def create_websocket_access_logger() -> TonberryWebsocketLogger:
 
 
 def create_app_logger() -> TonberryLogger:
-    logger = TonberryLogger("ct_app", INFO)
+    logger = TonberryLogger("tb_app", INFO)
     handler = StreamHandler()
     formatter = Formatter("{asctime} {levelname} {message}", style="{")
     handler.setFormatter(formatter)
