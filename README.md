@@ -5,7 +5,7 @@ routing. Influenced by [CherryPy](https://cherrypy.org/) but made compatible
 with asyncio. A companion ASGI server named **Qactuar** was spawned from this
 project. Check it out [here](https://github.com/Ayehavgunne/Qactuar)!
 
-### Installing
+## Installing
 
 ```bash
 $ pip install tonberry
