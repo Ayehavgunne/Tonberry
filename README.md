@@ -1,4 +1,4 @@
-# Tonberry
+# Tonberry <img src="Tonberry.png" width="100" title="Tonberry">
 
 An ASGI compliant web microframework that takes a class based approach to
 routing. Influenced by [CherryPy](https://cherrypy.org/) but made compatible
