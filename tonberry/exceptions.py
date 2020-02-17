@@ -26,3 +26,7 @@ class WebSocketError(TonberryException):
 
 class WebSocketDisconnect(TonberryException):
     pass
+
+
+class WebSocketDisconnectError(TonberryException):
+    pass

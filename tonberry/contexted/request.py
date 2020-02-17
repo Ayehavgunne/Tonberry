@@ -36,6 +36,8 @@ class Request:
                     yield body
                 if not chunk.get("more_body", False):
                     break
+            else:
+                break
         yield b""
 
     async def get_body(self) -> bytes:

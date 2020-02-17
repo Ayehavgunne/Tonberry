@@ -2,8 +2,6 @@ from pathlib import Path
 from typing import Callable, Generator, List, Union
 from uuid import UUID, uuid4
 
-from websockets import ConnectionClosedError, ConnectionClosedOK
-
 from tonberry import request as request_context
 from tonberry import response as response_context
 from tonberry import session as session_context
@@ -17,7 +15,7 @@ from tonberry.exceptions import (
     RouteNotFoundError,
     WebSocketDisconnect,
     WebSocketError,
-)
+    WebSocketDisconnectError)
 from tonberry.handlers import HTTPHandler, LifespanHandler, WebSocketHandler
 from tonberry.loggers import (
     create_app_logger,
@@ -113,9 +111,9 @@ class App:
                 self.websocket_access_logger.info("Opened")
                 try:
                     await func(*args)
-                except (WebSocketDisconnect, ConnectionClosedOK):
+                except WebSocketDisconnect:
                     self.websocket_access_logger.info("Disconnected")
-                except ConnectionClosedError:
+                except WebSocketDisconnectError:
                     self.websocket_access_logger.error("Disconnected unexpectedly")
                 break
             except RouteNotFoundError:
