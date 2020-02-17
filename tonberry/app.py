@@ -6,6 +6,7 @@ from tonberry import request as request_context
 from tonberry import response as response_context
 from tonberry import session as session_context
 from tonberry import websocket as websocket_context
+from tonberry.config import config_init
 from tonberry.context_var_manager import set_context_var
 from tonberry.contexted.request import Request
 from tonberry.contexted.response import Response
@@ -29,10 +30,11 @@ from tonberry.websocket import WebSocket
 
 class App:
     def __init__(self, routers: List[Router] = None):
+        self.config = config_init()
         self.routers = routers or [MethodRouter(self)]
-        self.http_access_logger = create_http_access_logger()
-        self.websocket_access_logger = create_websocket_access_logger()
-        self.app_logger = create_app_logger()
+        self.http_access_logger = create_http_access_logger(self.config.LOG_LEVEL)
+        self.websocket_access_logger = create_websocket_access_logger(self.config.LOG_LEVEL)
+        self.app_logger = create_app_logger(self.config.LOG_LEVEL)
         self.sessions = SessionStore()
         self.startup_functions: List[Callable] = []
         self.shutdown_functions: List[Callable] = []
@@ -98,7 +100,8 @@ class App:
                     pass
             else:  # no break
                 raise HTTPError(404)
-        self.http_access_logger.info()
+        if self.config.ACCESS_LOGGING:
+            self.http_access_logger.info()
         return response
 
     async def handle_ws_request(self, websocket: WebSocket, request: Request) -> None:

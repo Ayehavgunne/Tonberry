@@ -33,11 +33,19 @@ def create_app(root: Type = None) -> "App":
     return app_instance
 
 
-def quick_start(root: Type, host: str = "localhost", port: int = 8080) -> None:
+def quick_start(root: Type, host: str = None, port: int = None) -> None:
     import uvicorn
 
     quick_app = create_app()
     # noinspection PyTypeHints
     quick_app.routers[0].root = root()  # type: ignore
+    host = host or quick_app.config.HOST
+    port = port or quick_app.config.PORT
 
-    uvicorn.run(quick_app, host=host, port=port, log_level="info", access_log=False)
+    uvicorn.run(
+        quick_app,
+        host=host,
+        port=port,
+        log_level=quick_app.config.LOG_LEVEL,
+        access_log=False,
+    )
