@@ -2,11 +2,11 @@ from pathlib import Path
 from typing import Callable, Generator, List, Union
 from uuid import UUID, uuid4
 
+from tonberry import config
 from tonberry import request as request_context
 from tonberry import response as response_context
 from tonberry import session as session_context
 from tonberry import websocket as websocket_context
-from tonberry.config import config_init
 from tonberry.context_var_manager import set_context_var
 from tonberry.contexted.request import Request
 from tonberry.contexted.response import Response
@@ -15,8 +15,9 @@ from tonberry.exceptions import (
     HTTPError,
     RouteNotFoundError,
     WebSocketDisconnect,
+    WebSocketDisconnectError,
     WebSocketError,
-    WebSocketDisconnectError)
+)
 from tonberry.handlers import HTTPHandler, LifespanHandler, WebSocketHandler
 from tonberry.loggers import (
     create_app_logger,
@@ -30,10 +31,12 @@ from tonberry.websocket import WebSocket
 
 class App:
     def __init__(self, routers: List[Router] = None):
-        self.config = config_init()
+        self.config = config
         self.routers = routers or [MethodRouter(self)]
         self.http_access_logger = create_http_access_logger(self.config.LOG_LEVEL)
-        self.websocket_access_logger = create_websocket_access_logger(self.config.LOG_LEVEL)
+        self.websocket_access_logger = create_websocket_access_logger(
+            self.config.LOG_LEVEL
+        )
         self.app_logger = create_app_logger(self.config.LOG_LEVEL)
         self.sessions = SessionStore()
         self.startup_functions: List[Callable] = []

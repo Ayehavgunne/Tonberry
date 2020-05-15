@@ -1,3 +1,6 @@
+GET http://localhost:8000/jinja_stuff
+
+###
 POST http://localhost:8000/what
 Content-Type: application/json
 

@@ -3,7 +3,7 @@
 An ASGI compliant web microframework that takes a class based approach to
 routing. Influenced by [CherryPy](https://cherrypy.org/) but made compatible
 with asyncio. A companion ASGI server named **Qactuar** was spawned from this
-project. Check it out [here](https://github.com/Ayehavgunne/Qactuar)!
+project which is currently in the works.
 
 ## Installing
 
@@ -36,7 +36,7 @@ from dataclasses import dataclass
 
 import uvicorn
 
-from tonberry import create_app, expose, File, websocket
+from tonberry import create_app, expose, File, websocket, jinja
 from tonberry.content_types import TextPlain, TextHTML, ApplicationJson
 
 
@@ -127,6 +127,19 @@ class Root:
         complete, success, result = await do_that_thing(data1, data2)
         return {"completed": complete, "outcome": success, "body": result}
 
+    @expose.get
+    async def use_jinja(self) -> TextPlain:
+        """
+        In the config a template path can be configured to point to where all
+        your Jinja2 template files are located. To use a template just call
+        the `jinja` function with a file name and a context dict with the
+        desired replacement values.
+        
+        URL: http://127.0.0.1:8888/use_jinja
+        Response Body: I say hello!
+        """
+        return jinja(file_name="jinja.txt", context={"my_var": "hello"})
+
     @expose.websocket
     async def ws(self):
         """
@@ -179,9 +192,7 @@ This project is licensed under the MIT License - see the
 
 ## TODO
 - JWT integration
-- Jinja2 integration
 - Authentication
 - URL generation
-- Configuration
 - Tests
 - Documentation

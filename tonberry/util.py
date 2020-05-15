@@ -6,6 +6,8 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Dict, Union
 
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
 from tonberry.models import StrOrBytes
 
 
@@ -61,3 +63,23 @@ class File:
                 break
             chunks.append(chunk)
         return b"".join(chunks)
+
+
+class Jinja:
+    def __init__(
+        self, template_path: Path, file_name: str = None, context: dict = None
+    ):
+        self.template_path = template_path
+        self.file_name = file_name or ""
+        self.context = context or {}
+        self.environment = Environment(
+            loader=FileSystemLoader(self.template_path),
+            autoescape=select_autoescape(["html", "xml"]),
+        )
+
+    def __call__(self, file_name: str, context: dict) -> "Jinja":
+        return Jinja(self.template_path, file_name, context)
+
+    def render(self) -> str:
+        template = self.environment.get_template(self.file_name)
+        return template.render(**self.context)

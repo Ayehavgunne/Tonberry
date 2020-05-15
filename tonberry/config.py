@@ -11,6 +11,7 @@ class Config:
     PORT: int = 8000
     LOG_LEVEL: str = "DEBUG"
     ACCESS_LOGGING: bool = True
+    JINJA_TEMPLATE_PATH: str = "."
 
 
 def config_init() -> Config:

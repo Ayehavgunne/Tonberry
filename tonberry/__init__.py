@@ -1,11 +1,13 @@
+from pathlib import Path
 from typing import TYPE_CHECKING, Type
 
+from tonberry.config import config_init
 from tonberry.context_var_manager import ContextVarManager
 from tonberry.contexted.request import Request
 from tonberry.contexted.response import Response
 from tonberry.contexted.session import Session
 from tonberry.expose import _Expose
-from tonberry.util import File
+from tonberry.util import File, Jinja
 from tonberry.websocket import WebSocket
 
 if TYPE_CHECKING:
@@ -22,6 +24,8 @@ response: Response = ContextVarManager("response")  # type: ignore
 session: Session = ContextVarManager("session")  # type: ignore
 # noinspection PyTypeChecker
 websocket: WebSocket = ContextVarManager("websocket")  # type: ignore
+config = config_init()
+jinja = Jinja(Path(config.JINJA_TEMPLATE_PATH))
 
 
 def create_app(root: Type = None) -> "App":
@@ -46,6 +50,6 @@ def quick_start(root: Type, host: str = None, port: int = None) -> None:
         quick_app,
         host=host,
         port=port,
-        log_level=quick_app.config.LOG_LEVEL,
+        log_level=quick_app.config.LOG_LEVEL.lower(),
         access_log=False,
     )
