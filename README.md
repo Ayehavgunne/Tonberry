@@ -100,7 +100,7 @@ class Root:
     @expose.get('somepage')
     async def some_page(self) -> TextHTML:
         """
-        Returning a file like object result in the file contents being read and
+        Returning a file like object results in the file contents being read and
         put into the response body.
 
         The expose decorator methods can take an optional argument for the name
