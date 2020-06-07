@@ -56,6 +56,9 @@ class SubPage:
     @expose.post
     async def index(self, request: Request) -> Response:
         """
+        This class `SubPage` is assigned a route below in the `Root` class as a
+        class attribute.
+        
         With type hints indicating a dataclass object, the body of the request
         will automatically be deserialized into that object, even if it
         contains nested dataclasses and types will be checked thanks to the
