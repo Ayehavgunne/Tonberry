@@ -1,3 +1,4 @@
 uvicorn
 dacite
 user-agents
+jinja2

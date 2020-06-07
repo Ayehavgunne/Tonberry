@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from tonberry import File, expose, quick_start, request, session, create_app
+from tonberry import File, create_app, expose, jinja, quick_start, request, session
 from tonberry.content_types import ApplicationJson, TextHTML, TextPlain
 from tonberry.exceptions import HTTPRedirect
 
@@ -112,12 +112,16 @@ class Root:
         return {"hello": "world", "thing": thing}
 
     @staticmethod
-    def do_a_thing(num: int) -> int:
+    async def do_a_thing(num: int) -> int:
         return num * 2
 
     @expose.get
-    def i_redirect(self):
+    async def i_redirect(self):
         raise HTTPRedirect("/getjson")
+
+    @expose.get
+    async def jinja_stuff(self) -> TextPlain:
+        return jinja(file_name="jinja.txt", context={"my_var": "hello"})
 
 
 app = create_app(Root)
