@@ -1,6 +1,10 @@
 from setuptools import find_packages, setup
 
-from tonberry.__version__ import VERSION
+with open('CHANGELOG.md', 'r') as fh:
+    for line in fh.readlines():
+        if 'Current Version: ' in line:
+            version = line.replace('Current Version: ', '')
+            break
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -10,7 +14,7 @@ with open("requirements.txt", "r") as fh:
 
 setup(
     name="Tonberry",
-    version=VERSION,
+    version=version,
     description="ASGI compliant web microframework",
     long_description=long_description,
     long_description_content_type="text/markdown",
