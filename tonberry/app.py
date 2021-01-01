@@ -2,11 +2,11 @@ from pathlib import Path
 from typing import Callable, Generator, List, Union
 from uuid import UUID, uuid4
 
-from tonberry import config
 from tonberry import request as request_context
 from tonberry import response as response_context
 from tonberry import session as session_context
 from tonberry import websocket as websocket_context
+from tonberry.config import Config, config_init
 from tonberry.context_var_manager import set_context_var
 from tonberry.contexted.request import Request
 from tonberry.contexted.response import Response
@@ -18,7 +18,7 @@ from tonberry.exceptions import (
     WebSocketDisconnectError,
     WebSocketError,
 )
-from tonberry.handlers import HTTPHandler, LifespanHandler, WebSocketHandler
+from tonberry.handlers import Handler, HTTPHandler, LifespanHandler, WebSocketHandler
 from tonberry.loggers import (
     create_app_logger,
     create_http_access_logger,
@@ -30,8 +30,8 @@ from tonberry.websocket import WebSocket
 
 
 class App:
-    def __init__(self, routers: List[Router] = None):
-        self.config = config
+    def __init__(self, routers: List[Router] = None, config: Config = None):
+        self.config = config or config_init()
         self.routers = routers or [MethodRouter(self)]
         self.http_access_logger = create_http_access_logger(self.config.LOG_LEVEL)
         self.websocket_access_logger = create_websocket_access_logger(
@@ -43,12 +43,13 @@ class App:
         self.shutdown_functions: List[Callable] = []
 
     async def __call__(self, scope: Scope, recieve: Receive, send: Send) -> None:
+        handler: Handler
         if scope["type"] == "http":
             handler = HTTPHandler(self, scope)
         elif scope["type"] == "websocket":
-            handler = WebSocketHandler(self, scope)  # type: ignore
+            handler = WebSocketHandler(self, scope)
         elif scope["type"] == "lifespan":
-            handler = LifespanHandler(self, scope)  # type: ignore
+            handler = LifespanHandler(self, scope)
         else:
             raise RuntimeError(
                 f"{scope['type']} is either not a standard ASGI scope type or is not "

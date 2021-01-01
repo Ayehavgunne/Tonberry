@@ -1,6 +1,6 @@
 from typing import IO, TypeVar
 
-from tonberry import File
+from tonberry.util import File
 
 TextHTML = TypeVar("TextHTML", str, bytes, IO, File)
 TextPlain = TypeVar("TextPlain", str, bytes, IO, File)
@@ -52,7 +52,7 @@ ApplicationVndOpenXmlFormatsOfficeDocumentPresentationmlPresentation = TypeVar(
     IO,
     File,
 )
-ApplicationMsWord = TypeVar("ApplicationMsWord", bytes, IO,)
+ApplicationMsWord = TypeVar("ApplicationMsWord", bytes, IO)
 ApplicationVndOpenXmlFormatsOfficeDocumentWordProcessingmlDocument = TypeVar(
     "ApplicationVndOpenXmlFormatsOfficeDocumentWordProcessingmlDocument",
     bytes,

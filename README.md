@@ -2,8 +2,7 @@
 
 An ASGI compliant web microframework that takes a class based approach to
 routing. Influenced by [CherryPy](https://cherrypy.org/) but made compatible
-with asyncio. A companion ASGI server named **Qactuar** was spawned from this
-project which is currently in the works.
+with asyncio.
 
 ## Installing
 
@@ -33,11 +32,17 @@ quick_start(Root)
 ```python
 import asyncio
 from dataclasses import dataclass
+from pathlib import Path
 
 import uvicorn
 
-from tonberry import create_app, expose, File, websocket, jinja
+from tonberry import create_app, expose, websocket, Config
+from tonberry.util import File, Jinja
 from tonberry.content_types import TextPlain, TextHTML, ApplicationJson
+
+
+config = Config()
+jinja = Jinja(Path(config.JINJA_TEMPLATE_PATH))
 
 
 @dataclass

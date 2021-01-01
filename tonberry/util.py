@@ -77,8 +77,8 @@ class Jinja:
             autoescape=select_autoescape(["html", "xml"]),
         )
 
-    def __call__(self, file_name: str, context: dict) -> "Jinja":
-        return Jinja(self.template_path, file_name, context)
+    def __call__(self, file_name: str, context: dict) -> str:
+        return Jinja(self.template_path, file_name, context).render()
 
     def render(self) -> str:
         template = self.environment.get_template(self.file_name)

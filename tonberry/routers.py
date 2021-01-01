@@ -26,7 +26,7 @@ from tonberry.contexted.response import Response
 from tonberry.exceptions import FigureItOutLaterException, RouteNotFoundError
 from tonberry.expose import _Expose
 from tonberry.models import Branch, Leaf, TreePart
-from tonberry.util import DataClassEncoder, File, Jinja, format_data
+from tonberry.util import DataClassEncoder, File, format_data
 
 if TYPE_CHECKING:
     from tonberry.app import App
@@ -38,8 +38,6 @@ class Router:
         self._response: Response = Response()
 
     async def format_response_body(self, result: Any) -> bytes:
-        if isinstance(result, Jinja):
-            result = result.render()
         if isinstance(result, (dict, list)) or is_dataclass(result):
             if not self._response.content_type:
                 self._response.content_type = "application/json"

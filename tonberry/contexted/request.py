@@ -2,7 +2,6 @@ from typing import Any, AsyncGenerator, Dict, Optional, Tuple, Union
 from urllib.parse import ParseResult, ParseResultBytes, parse_qs, urlparse
 
 import user_agents
-from user_agents.parsers import UserAgent
 
 from tonberry.header import Header
 from tonberry.models import Receive, Scope, StrOrBytes, TreePart
@@ -100,7 +99,7 @@ class Request:
         return self._uri.port
 
     @property
-    def user_agent(self) -> UserAgent:
+    def user_agent(self) -> user_agents.parsers.UserAgent:
         if not self._user_agent:
             self._user_agent = user_agents.parse(
                 self.headers["user-agent"] or "unknown"

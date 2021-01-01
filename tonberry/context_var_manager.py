@@ -1,5 +1,6 @@
-from _contextvars import ContextVar
 from typing import Any, Hashable
+
+from _contextvars import ContextVar
 
 
 class ContextVarManager:

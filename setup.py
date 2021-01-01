@@ -1,16 +1,23 @@
+from pathlib import Path
+
 from setuptools import find_packages, setup
 
-with open('CHANGELOG.md', 'r') as fh:
+PROJECT_ROOT = Path(__file__).parent
+
+with (PROJECT_ROOT / "tonberry" / "__init__.py").open("r") as fh:
     for line in fh.readlines():
-        if 'Current Version: ' in line:
-            version = line.replace('Current Version: ', '')
+        if line.startswith("__version__ = "):
+            version = line.split("=")[1].strip().replace('"', "")
             break
 
-with open("README.md", "r") as fh:
+with (PROJECT_ROOT / "README.md").open("r") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", "r") as fh:
+with (PROJECT_ROOT / "requirements.txt").open("r") as fh:
     requirements = fh.readlines()
+
+with (PROJECT_ROOT / "dev_requirements.txt").open("r") as fh:
+    dev_requirements = fh.readlines()
 
 setup(
     name="Tonberry",
@@ -24,6 +31,6 @@ setup(
     url="https://github.com/Ayehavgunne/Tonberry/",
     packages=find_packages(),
     install_requires=requirements,
-    extras_require={"dev": ["mypy", "black", "isort"]},
+    extras_require={"dev": dev_requirements},
     python_requires=">=3.7",
 )

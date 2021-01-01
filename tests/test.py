@@ -1,8 +1,13 @@
 from dataclasses import dataclass
+from pathlib import Path
 
-from tonberry import File, create_app, expose, jinja, quick_start, request, session
+from tonberry import Config, expose, quick_start, request, session
 from tonberry.content_types import ApplicationJson, TextHTML, TextPlain
 from tonberry.exceptions import HTTPRedirect
+from tonberry.util import File, Jinja
+
+config = Config()
+jinja = Jinja(Path(config.JINJA_TEMPLATE_PATH))
 
 
 @dataclass
@@ -124,8 +129,5 @@ class Root:
         return jinja(file_name="jinja.txt", context={"my_var": "hello"})
 
 
-app = create_app(Root)
-
-
 if __name__ == "__main__":
-    quick_start(Root, "127.0.0.1", 8000)
+    quick_start(Root)

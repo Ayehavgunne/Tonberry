@@ -7,9 +7,9 @@ from pathlib import Path
 
 @dataclass
 class Config:
-    HOST: str = "localhost"
+    HOST: str = "127.0.0.1"
     PORT: int = 8000
-    LOG_LEVEL: str = "DEBUG"
+    LOG_LEVEL: str = "INFO"
     ACCESS_LOGGING: bool = True
     JINJA_TEMPLATE_PATH: str = "."
 
