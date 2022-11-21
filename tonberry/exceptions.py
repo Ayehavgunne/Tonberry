@@ -2,7 +2,7 @@ class TonberryException(Exception):
     pass
 
 
-class HTTPRedirect(TonberryException):
+class HTTPRedirectError(TonberryException):
     def __init__(self, route: str, code: int = 307):
         self.route = route
         self.code = code

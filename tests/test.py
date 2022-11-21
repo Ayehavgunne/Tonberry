@@ -3,7 +3,7 @@ from pathlib import Path
 
 from tonberry import Config, expose, quick_start, request, session
 from tonberry.content_types import ApplicationJson, TextHTML, TextPlain
-from tonberry.exceptions import HTTPRedirect
+from tonberry.exceptions import HTTPRedirectError
 from tonberry.util import File, Jinja
 
 config = Config()
@@ -122,7 +122,7 @@ class Root:
 
     @expose.get
     async def i_redirect(self):
-        raise HTTPRedirect("/getjson")
+        raise HTTPRedirectError("/getjson")
 
     @expose.get
     async def jinja_stuff(self) -> TextPlain:

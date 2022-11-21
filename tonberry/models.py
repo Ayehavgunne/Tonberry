@@ -14,6 +14,11 @@ from typing import (
 
 
 @dataclass
+class Alias:
+    aliased: str
+
+
+@dataclass
 class RouteMapping:
     route: str = ""
     func: Optional[Callable] = None

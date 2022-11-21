@@ -25,7 +25,7 @@ from tonberry.contexted.request import Request
 from tonberry.contexted.response import Response
 from tonberry.exceptions import FigureItOutLaterException, RouteNotFoundError
 from tonberry.expose import _Expose
-from tonberry.models import Branch, Leaf, TreePart
+from tonberry.models import Alias, Branch, Leaf, TreePart
 from tonberry.util import DataClassEncoder, File, format_data
 
 if TYPE_CHECKING:
@@ -54,6 +54,12 @@ class Router:
             return b"".join(result.readlines())
         if isinstance(result, File):
             return await result.read()
+        if isinstance(result, bool):
+            return str(result).lower().encode("utf-8")
+        if isinstance(result, (int, float)):
+            return str(result).encode("utf-8")
+        if result is None:
+            return b"null"
         if isinstance(result, str):
             return result.encode("utf-8")
         if isinstance(result, bytes):
@@ -230,7 +236,11 @@ class MethodRouter(DynamicRouter):
         children: List[TreePart] = []
 
         for key, value in cls.__class__.__dict__.items():
+            is_aliased = False
             if not key.startswith("_"):
+                if isinstance(value, Alias):
+                    value = getattr(cls, value.aliased)
+                    is_aliased = True
                 if (
                     key.islower()
                     and hasattr(value, "__class__")
@@ -244,12 +254,15 @@ class MethodRouter(DynamicRouter):
                         child.parent = branch
                     children.append(branch)
                 elif inspect.ismethod(value) or inspect.isfunction(value):
+                    mapping = None
                     mappings = self.method_registration.get_all_maps_by_func(
                         value.__name__, cls.__class__.__name__
                     )
                     mappings = {mapping for mapping in mappings if mapping}
                     for mapping in mappings:
                         children.append(Leaf(mapping.route, cls, mapping))
+                    if is_aliased:
+                        children.append(Leaf(key, cls, mapping))
 
         return children
 

@@ -113,9 +113,8 @@ class Root:
         of the method.
 
         To indicate what the content-type header you want to set then use a type
-        hints for the return value from tonberry.content_types. This feature may
-        or may not stay as part of the project. It will not overwrite any
-        content type set manually inside the method.
+        hints for the return value from tonberry.content_types. It will not 
+        overwrite any content type set manually inside the method.
 
         URL: http://127.0.0.1:8888/somepage
         """

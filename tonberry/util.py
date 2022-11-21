@@ -8,7 +8,7 @@ from typing import Any, Dict, Union
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from tonberry.models import StrOrBytes
+from tonberry.models import Alias, StrOrBytes
 
 
 class DataClassEncoder(json.JSONEncoder):
@@ -16,6 +16,10 @@ class DataClassEncoder(json.JSONEncoder):
         if is_dataclass(obj):
             return asdict(obj)
         return json.JSONEncoder.default(self, obj)
+
+
+def alias(app_route: str) -> Alias:
+    return Alias(app_route)
 
 
 def decode_bytes_to_str(value: StrOrBytes) -> str:

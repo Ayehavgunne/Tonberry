@@ -1,4 +1,4 @@
-from typing import IO, TypeVar
+from typing import IO, Type, TypeVar
 
 from tonberry.util import File
 
@@ -18,7 +18,20 @@ ApplicationOgg = TypeVar("ApplicationOgg", bytes, IO, File)
 ApplicationPdf = TypeVar("ApplicationPdf", bytes, IO, File)
 ApplicationXHtmlXml = TypeVar("ApplicationXHtmlXml", str, bytes, IO, File)
 ApplicationXShockwaveFlash = TypeVar("ApplicationXShockwaveFlash", bytes, IO, File)
-ApplicationJson = TypeVar("ApplicationJson", str, bytes, dict, list, IO, File)
+ApplicationJson = TypeVar(
+    "ApplicationJson",
+    str,
+    bytes,
+    dict,
+    list,
+    int,
+    str,
+    float,
+    bool,
+    Type[None],
+    IO,
+    File,
+)
 ApplicationLdJson = TypeVar("ApplicationLdJson", str, bytes, IO, File)
 ApplicationXml = TypeVar("ApplicationXml", str, bytes, IO, File)
 ApplicationZip = TypeVar("ApplicationZip", bytes, IO, File)
@@ -52,7 +65,11 @@ ApplicationVndOpenXmlFormatsOfficeDocumentPresentationmlPresentation = TypeVar(
     IO,
     File,
 )
-ApplicationMsWord = TypeVar("ApplicationMsWord", bytes, IO)
+ApplicationMsWord = TypeVar(
+    "ApplicationMsWord",
+    bytes,
+    IO,
+)
 ApplicationVndOpenXmlFormatsOfficeDocumentWordProcessingmlDocument = TypeVar(
     "ApplicationVndOpenXmlFormatsOfficeDocumentWordProcessingmlDocument",
     bytes,

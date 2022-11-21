@@ -6,7 +6,7 @@ from tonberry import response as response_context
 from tonberry.context_var_manager import set_context_var
 from tonberry.contexted.request import Request
 from tonberry.contexted.response import Response
-from tonberry.exceptions import HTTPError, HTTPRedirect
+from tonberry.exceptions import HTTPError, HTTPRedirectError
 from tonberry.models import Receive, Scope, Send
 from tonberry.websocket import WebSocket
 
@@ -39,7 +39,7 @@ class HTTPHandler(Handler):
             set_context_var(response_context, response)
             self.app.http_access_logger.error()
             await self.handle_exception(response, send)
-        except HTTPRedirect as err:
+        except HTTPRedirectError as err:
             response = Response()
             response.status = err.code
             response.headers["Location"] = err.route
